@@ -39,11 +39,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests->requests
-                        .requestMatchers("/").authenticated()
-                        .requestMatchers(HttpMethod.GET,"/admin").hasAuthority("admin:read")
-                        .requestMatchers(HttpMethod.GET,"/posts").authenticated()
-                        .requestMatchers(HttpMethod.POST,"/posts").hasAuthority("posts:write")
-                        .anyRequest().permitAll())
+                        .requestMatchers("/admin/admins").hasAuthority("admin:manage")
+                        .requestMatchers("/admin/users").hasAuthority("user:manage")
+                        .requestMatchers("/admin/transactions").hasAuthority("transaction:manage")
+                        .requestMatchers("/admin/**").hasAuthority("admin:read")
+                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/auth/**").permitAll())
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                         .jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))

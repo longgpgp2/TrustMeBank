@@ -11,14 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-@RestController("/auth")
+@RestController()
+@RequestMapping("/auth")
 public class AuthController {
     @Autowired
     CustomUserDetailsService userDetailsService;
@@ -32,13 +30,9 @@ public class AuthController {
     public ResponseEntity<String> home(){
         return new ResponseEntity<String>("message", HttpStatus.OK);
     }
-    @GetMapping("/admin")
-    public ResponseEntity<String> admin(){
-        return new ResponseEntity<String>("admin hello", HttpStatus.OK);
-    }
-    @GetMapping("/posts")
-    public ResponseEntity<String> posts(){
-        return new ResponseEntity<String>("posts hello", HttpStatus.OK);
+    @GetMapping("/register")
+    public ResponseEntity<String> getRegister() {
+        return new ResponseEntity<String>("Hello, please enter your credentials", HttpStatus.OK);
     }
     @PostMapping("/register")
     public ResponseEntity<String> postRegister(@RequestBody UserRegisterRequest registerRequest){
@@ -46,10 +40,10 @@ public class AuthController {
         if(user!=null) {
             return new ResponseEntity<String>("User already exists", HttpStatus.NOT_ACCEPTABLE);
         }
-        System.out.println(registerRequest.getPassword() + registerRequest.getUsername());
         authService.registerUser(registerRequest);
         return new ResponseEntity<String>("User created successfully", HttpStatus.OK);
     }
+
 
     @GetMapping("/login")
     public ResponseEntity<String> getLogin(){

@@ -20,10 +20,10 @@ public class AuthService {
     public void registerUser(UserRegisterRequest registerRequest) {
 //        User user = UserMapper.INSTANCE.toUser (registerRequest);
         Optional<Role> role = roleRepository.findById(Long.parseLong("1"));
-        User user = new User.UserBuilder()
-                .setUsername(registerRequest.getUsername())
-                .setPassword(registerRequest.getPassword())
-                .setRole(role.get()).build();
+        User user = User.builder()
+                .username(registerRequest.getUsername())
+                .password(registerRequest.getPassword())
+                .role(role.get()).build();
         userRepository.save(user);
     }
 }

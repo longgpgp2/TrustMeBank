@@ -5,8 +5,8 @@ import java.util.Set;
 
 public enum Roles {
     USER("USER", Set.of()),
-    ADMIN("ADMIN", Set.of("admin:read", "posts:manage")),
-    SUPERADMIN("SUPERADMIN", Set.of("user:manage"));
+    ADMIN("ADMIN", Set.of("admin:read", "user:manage", "transaction:manage")),
+    SUPERADMIN("SUPERADMIN", Set.of("admin:manage"));
 
     private final String role;
     private final Set<String> authorities;
