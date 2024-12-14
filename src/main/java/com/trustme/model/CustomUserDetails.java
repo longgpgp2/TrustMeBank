@@ -1,18 +1,19 @@
 package com.trustme.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import lombok.Getter;
+import lombok.Setter;
+
 @Getter
 @Setter
 public class CustomUserDetails implements UserDetails {
-    private final User user;
+    private User user;
 
     public CustomUserDetails(User user) {
         this.user = user;
@@ -27,12 +28,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return user.getUsername();
     }
 
     @Override

@@ -18,4 +18,5 @@ public class TokenController {
         List<String> scopes = Arrays.asList("home:read", "admin:read");
         return keyGenerator.generateJwt(username, scopes, 3600L);
     }
+
 }
