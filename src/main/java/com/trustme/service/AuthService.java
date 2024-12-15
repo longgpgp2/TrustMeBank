@@ -3,7 +3,9 @@ package com.trustme.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.trustme.dto.request.UserRegisterRequest;
@@ -35,4 +37,7 @@ public class AuthService {
                 .build();
         userRepository.save(user);
     }
+//    public Jwt getCurrentLoggedInUser(@AuthenticationPrincipal Jwt jwt){
+//        return jwt;
+//    }
 }
