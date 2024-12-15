@@ -34,7 +34,7 @@ public class TransferController {
     }
     @PostMapping("/transfer")
     public ResponseEntity<String> postTransfer(@RequestBody TransferRequest transferRequest){
-        return transferService.transferMoney(transferRequest.getAmount(),transferRequest.getReceiver());
+        return transferService.transferMoney(transferRequest.getAmount(),transferRequest.getReceiver(), transferRequest.getDescription());
     }
     @GetMapping("/qr/generate")
     public ResponseEntity<byte[]> generateQRCode() {

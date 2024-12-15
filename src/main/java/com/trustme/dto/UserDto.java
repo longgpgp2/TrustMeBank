@@ -5,6 +5,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -13,12 +14,12 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class UserDto {
-    private String id;
+    private Long id;
     private String username;
     private String accountName;
     private double balance;
-    private Role role;
-    private Date createdAt;
-    private Date updatedAt;
+    private String[] role;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private boolean isDisabled;
 }

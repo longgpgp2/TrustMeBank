@@ -12,4 +12,5 @@ import java.math.BigInteger;
 public class TransferRequest {
     Double amount;
     String receiver;
+    String description;
 }

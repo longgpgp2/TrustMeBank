@@ -69,7 +69,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> postLogin(@RequestBody UserLoginRequest loginRequest) {
+    public LoginResponse postLogin(@RequestBody UserLoginRequest loginRequest) {
         try {
             CustomUserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
             authenticationManager.authenticate(
@@ -80,17 +80,14 @@ public class AuthController {
                 User user = userDetails.getUser();
                 System.out.println(user.getUsername() + user.getPassword());
                 String token = keyGenerator.generateJwt(user.getUsername(), authoritiesList, 3600L);
-                return ResponseEntity.ok(new LoginResponse(HttpStatus.OK, "Login successful", token));
+                return new LoginResponse(HttpStatus.OK, "Login successful", token);
             }
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new LoginResponse(HttpStatus.UNAUTHORIZED, "Incorrect username or password", null));
+            return new LoginResponse(HttpStatus.UNAUTHORIZED, "Incorrect username or password", null);
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new LoginResponse(HttpStatus.UNAUTHORIZED, "User not found", null));
+            new LoginResponse(HttpStatus.UNAUTHORIZED, "User not found", null);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new LoginResponse(HttpStatus.UNAUTHORIZED, "Invalid credentials", null));
+        return new LoginResponse(HttpStatus.UNAUTHORIZED, "Invalid credentials", null);
     }
 
     @GetMapping("/info")
