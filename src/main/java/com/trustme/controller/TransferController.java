@@ -77,20 +77,7 @@ public class TransferController {
     }
     @PostMapping("/qr/decode")
     public ResponseEntity<String> decodeQRCode(@RequestParam("file") MultipartFile file) {
-        try {
-            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-
-            LuminanceSource source = new BufferedImageLuminanceSource(bufferedImage);
-            BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-
-            Result result = new MultiFormatReader().decode(bitmap);
-
-            return ResponseEntity.ok("QR Code Content: " + result.getText());
-        } catch (NotFoundException e) {
-            return ResponseEntity.badRequest().body("No QR code found in the image.");
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error processing the file.");
-        }
+        return qrCodeService.decodeQRCode(file);
     }
 
 }

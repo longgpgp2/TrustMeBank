@@ -13,13 +13,15 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-
+/**
+ * String Configuration Component for configuring Spring Security & Oauth2, jwt functionalities
+ */
 @Configuration
 public class SecurityConfig {
     // @Value("${jwt.signerKey}")
     static String SIGNING_KEY_BASE64 = "BynaRVN1R8shGkku6SmSnQJzGc8ZSs7aTQzDRlnD2ckNfZ+EDEInq0ap6Ktqcm6meg3sNQaLyDGOCRw6eMC1Vg==";
 
-    /*
+    /**
      * 1. The authentication Filter from Reading the Bearer Token passes a
      * BearerTokenAuthenticationToken to the AuthenticationManager which is
      * implemented by ProviderManager.
@@ -74,6 +76,9 @@ public class SecurityConfig {
         return NimbusJwtDecoder.withSecretKey(secretKeySpec).macAlgorithm(MacAlgorithm.HS512).build();
     }
 
+    /**
+     * Bean for configuring jwt claims' prefixes.
+     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();

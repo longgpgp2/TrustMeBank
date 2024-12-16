@@ -15,6 +15,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
+/**
+ * Configuration class for handling Cross-Origin Resource Sharing
+ * Enable requests from clients from different domain
+ * */
 @Configuration
 public class CorsConfig {
     private static final Long MAX_AGE = 3600L;

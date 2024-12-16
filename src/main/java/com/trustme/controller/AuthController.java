@@ -2,6 +2,7 @@ package com.trustme.controller;
 
 import java.util.List;
 
+import com.trustme.service.KeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +27,6 @@ import com.trustme.model.CustomUserDetails;
 import com.trustme.model.User;
 import com.trustme.service.AuthService;
 import com.trustme.service.CustomUserDetailsService;
-import com.trustme.utils.AuthUtils;
-import com.trustme.utils.KeyGenerator;
 
 @RestController()
 @RequestMapping("/auth")
@@ -37,7 +36,7 @@ public class AuthController {
     @Autowired
     AuthService authService;
     @Autowired
-    KeyGenerator keyGenerator;
+    KeyService keyService;
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
@@ -76,10 +75,10 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
                             loginRequest.getPassword()));
             if (userDetails != null) {
-                List<String> authoritiesList = AuthUtils.getJwtAuthoritiesFromRoles(userDetails);
+                List<String> authoritiesList = authService.getJwtAuthoritiesFromRoles(userDetails);
                 User user = userDetails.getUser();
                 System.out.println(user.getUsername() + user.getPassword());
-                String token = keyGenerator.generateJwt(user.getUsername(), authoritiesList, 3600L);
+                String token = keyService.generateJwt(user.getUsername(), authoritiesList, 3600L);
                 return new LoginResponse(HttpStatus.OK, "Login successful", token);
             }
         } catch (BadCredentialsException e) {

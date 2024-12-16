@@ -26,6 +26,9 @@ public class WebConfig implements WebMvcConfigurer {
         return new CustomUserDetailsService();
     }
 
+    /**
+     * Add customized PasswordEncoder & CustomUserDetailsService to the AuthenticationManager.
+     * */
     @Bean
     public AuthenticationManager authenticationManager(CustomUserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {

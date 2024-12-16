@@ -18,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
     private UserRepository userRepository;
 
     @Override

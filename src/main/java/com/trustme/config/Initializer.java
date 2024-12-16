@@ -10,7 +10,9 @@ import com.trustme.dto.request.UserRegisterRequest;
 import com.trustme.model.Role;
 import com.trustme.repository.RoleRepository;
 import com.trustme.service.AuthService;
-
+/**
+ * Spring Component to initialize Roles and Users (For testing purpose)
+ * */
 @Component
 public class Initializer implements CommandLineRunner {
     @Autowired

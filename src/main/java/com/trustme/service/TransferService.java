@@ -18,7 +18,10 @@ import com.trustme.model.Transfer;
 import com.trustme.model.User;
 import com.trustme.repository.TransferRepository;
 import com.trustme.repository.UserRepository;
-
+/**
+ * Service class for handling transfer-related operations.
+ * This class contains methods for processing money transfers between users.
+ */
 @Service
 // @Transactional
 public class TransferService {
@@ -26,7 +29,14 @@ public class TransferService {
     TransferRepository transferRepository;
     @Autowired
     UserRepository userRepository;
-
+    /**
+     * Processes a money transfer from one user to another.
+     *
+     * @param amount the amount to transfer
+     * @param accountName the account name of the receiver
+     * @param description a description of the transfer
+     * @return a response entity indicating the result of the transfer
+     */
     public ResponseEntity<String> transferMoney(Double amount, String accountName, String description) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null && !authentication.isAuthenticated()) {
@@ -58,7 +68,11 @@ public class TransferService {
         return ResponseEntity.status(HttpStatus.OK).body("Transfer Successfully!");
 
     }
-
+    /**
+     * Retrieves the transfer history for a user.
+     *
+     * @return a list of TransferDto objects representing the user's transfer history
+     */
     public List<TransferDto> getAllTransfersHistory() {
         List<Transfer> transfers = transferRepository.findAll();
         return transfers.stream()
