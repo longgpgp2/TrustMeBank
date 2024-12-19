@@ -52,6 +52,14 @@ public class AuthController {
         return new ResponseEntity<String>("Hello, please enter your credentials", HttpStatus.OK);
     }
 
+    /**
+     *
+     * @comment_by: toanlemanh
+     *
+     *  minh co the tao enum cac loi thuong gap
+     *  ben trong controller dang xu ly nhieu logic qua, chu nen dispatch cho service roi
+     *  gui response tuong ung
+     */
     @PostMapping("/register")
     public ResponseEntity<String> postRegister(@RequestBody UserRegisterRequest registerRequest) {
         UserDetails user = userDetailsService.loadUserByUsername(registerRequest.getUsername());

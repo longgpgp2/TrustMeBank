@@ -1,12 +1,16 @@
 package com.trustme.dto.response;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatusCode;
 @Getter
 @Setter
+@Builder
 public class Response<T> {
     private HttpStatusCode code;
+//    message attributes for error,
+//    user's exceptions or server notification
     private String message;
     private T result;
     public Response(HttpStatusCode code, String message, T result) {
