@@ -35,12 +35,6 @@ public class AuthController {
     CustomUserDetailsService userDetailsService;
     @Autowired
     AuthService authService;
-    @Autowired
-    KeyService keyService;
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    PasswordEncoder passwordEncoder;
 
     @GetMapping("/")
     public ResponseEntity<String> home() {
@@ -69,24 +63,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public LoginResponse postLogin(@RequestBody UserLoginRequest loginRequest) {
-        try {
-            CustomUserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
-                            loginRequest.getPassword()));
-            if (userDetails != null) {
-                List<String> authoritiesList = authService.getJwtAuthoritiesFromRoles(userDetails);
-                User user = userDetails.getUser();
-                System.out.println(user.getUsername() + user.getPassword());
-                String token = keyService.generateJwt(user.getUsername(), authoritiesList, 3600L);
-                return new LoginResponse(HttpStatus.OK, "Login successful", token);
-            }
-        } catch (BadCredentialsException e) {
-            return new LoginResponse(HttpStatus.UNAUTHORIZED, "Incorrect username or password", null);
-        } catch (UsernameNotFoundException e) {
-            new LoginResponse(HttpStatus.UNAUTHORIZED, "User not found", null);
-        }
-        return new LoginResponse(HttpStatus.UNAUTHORIZED, "Invalid credentials", null);
+        return authService.loginUser(loginRequest);
     }
 
     @GetMapping("/info")

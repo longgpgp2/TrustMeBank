@@ -2,10 +2,19 @@ package com.trustme.service;
 
 import java.util.*;
 
+import com.trustme.dto.request.UserLoginRequest;
+import com.trustme.dto.response.LoginResponse;
+import com.trustme.dto.response.UserResponse;
 import com.trustme.enums.Roles;
+import com.trustme.model.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -27,6 +36,14 @@ public class AuthService {
     RoleRepository roleRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    CustomUserDetailsService userDetailsService;
+    @Autowired
+    AuthService authService;
+    @Autowired
+    KeyService keyService;
+    @Autowired
+    AuthenticationManager authenticationManager;
     /**
      * Registers a new user in the system.
      *
@@ -46,6 +63,26 @@ public class AuthService {
                 .role(role.get())
                 .build();
         userRepository.save(user);
+    }
+    public LoginResponse loginUser(UserLoginRequest loginRequest){
+        try {
+            CustomUserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                            loginRequest.getPassword()));
+            if (userDetails != null) {
+                List<String> authoritiesList = authService.getJwtAuthoritiesFromRoles(userDetails);
+                User user = userDetails.getUser();
+                System.out.println(user.getUsername() + user.getPassword());
+                String token = keyService.generateJwt(user.getUsername(), authoritiesList, 3600L);
+                return new LoginResponse(HttpStatus.OK, "Login successful", token);
+            }
+        } catch (BadCredentialsException e) {
+            return new LoginResponse(HttpStatus.UNAUTHORIZED, "Incorrect username or password", null);
+        } catch (UsernameNotFoundException e) {
+            new LoginResponse(HttpStatus.UNAUTHORIZED, "User not found", null);
+        }
+        return new LoginResponse(HttpStatus.UNAUTHORIZED, "Invalid credentials", null);
     }
     /**
      * Extract authorities from user's role
