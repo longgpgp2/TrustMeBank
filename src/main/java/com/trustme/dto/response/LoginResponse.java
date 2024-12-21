@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatusCode;
 
 @Getter
 @Setter
-@Builder
 public class LoginResponse extends Response<String> {
     public LoginResponse(HttpStatusCode code, String message, String token) {
         super(code, message, token);

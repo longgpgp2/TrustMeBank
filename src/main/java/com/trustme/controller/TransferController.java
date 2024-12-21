@@ -7,6 +7,8 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.trustme.dto.request.TransferRequest;
+import com.trustme.dto.response.TransferResponse;
+import com.trustme.dto.response.TransfersResponse;
 import com.trustme.service.AuthService;
 import com.trustme.service.QRCodeService;
 import com.trustme.service.TransferService;
@@ -39,7 +41,7 @@ public class TransferController {
         return ResponseEntity.ok("Choose an account to transfer money to.");
     }
     @PostMapping("/transfer")
-    public ResponseEntity<String> postTransfer(@RequestBody TransferRequest transferRequest){
+    public TransferResponse postTransfer(@RequestBody TransferRequest transferRequest){
         return transferService.transferMoney(transferRequest.getAmount(),transferRequest.getReceiver(), transferRequest.getDescription());
     }
     @PostMapping("/qr-transfer")

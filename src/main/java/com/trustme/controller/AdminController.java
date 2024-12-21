@@ -1,6 +1,10 @@
 package com.trustme.controller;
 
 import com.trustme.dto.TransferDto;
+import com.trustme.dto.response.Response;
+import com.trustme.dto.response.TransfersResponse;
+import com.trustme.enums.ErrorCode;
+import com.trustme.enums.StatusCode;
 import com.trustme.model.Transfer;
 import com.trustme.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +22,17 @@ public class AdminController {
     @Autowired
     TransferService transferService;
     @GetMapping("/dashboard")
-    public ResponseEntity<String> getDashboard(){
-        return ResponseEntity.ok().body("Welcome to admin dashboard");
+    public Response<String> getDashboard(){
+        return new Response(StatusCode.OK.getHttpStatus(),"Welcome to admin dashboard", null);
     }
     @GetMapping("/transfers")
-    public ResponseEntity<List<TransferDto>> getTransfers(){
+    public TransfersResponse getTransfers(){
         List<TransferDto> transfers = null;
         try{
              transfers = transferService.getAllTransfersHistory();
         } catch (Exception e){
-            return ResponseEntity.internalServerError().body(null);
+            return new TransfersResponse(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus(), ErrorCode.INTERNAL_SERVER_ERROR.getErrorMessage(), null);
         }
-        return ResponseEntity.ok().body(transfers);
+        return new TransfersResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), transfers);
     }
 }

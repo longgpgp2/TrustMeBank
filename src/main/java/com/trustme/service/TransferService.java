@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.trustme.dto.response.TransferResponse;
+import com.trustme.dto.response.TransfersResponse;
+import com.trustme.enums.ErrorCode;
+import com.trustme.enums.StatusCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,21 +39,22 @@ public class TransferService {
      * @param amount the amount to transfer
      * @param accountName the account name of the receiver
      * @param description a description of the transfer
-     * @return a response entity indicating the result of the transfer
+     * @return a TransferResponse indicating the result of the transfer
      */
-    public ResponseEntity<String> transferMoney(Double amount, String accountName, String description) {
+    public TransferResponse transferMoney(Double amount, String accountName, String description) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null && !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized!");
+            return new TransferResponse(ErrorCode.UNAUTHORIZED.getHttpStatus(), ErrorCode.UNAUTHORIZED.getErrorMessage(), null);
         }
         Jwt jwt = (Jwt) authentication.getPrincipal();
         Optional<User> optionalUser = userRepository.findByUsername(jwt.getSubject());
         Optional<User> optionalReceiver = userRepository.findByAccountName(accountName);
         if (optionalUser.isEmpty() || optionalReceiver.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Invalid Sender or Receiver!");
+            return new TransferResponse(ErrorCode.RECEIVER_NOT_FOUND.getHttpStatus(), ErrorCode.RECEIVER_NOT_FOUND.getErrorMessage(), null);
         }
         if (!optionalUser.get().validateAccountBalance(amount)) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Insufficient amount!");
+            return new TransferResponse(ErrorCode.INVALID_AMOUNT.getHttpStatus(), ErrorCode.INVALID_AMOUNT.getErrorMessage(), null);
+
         }
         User sender = optionalUser.get();
         User receiver = optionalReceiver.get();
@@ -65,7 +70,14 @@ public class TransferService {
         transferRepository.save(transfer);
         userRepository.save(sender);
         userRepository.save(receiver);
-        return ResponseEntity.status(HttpStatus.OK).body("Transfer Successfully!");
+        TransferDto transferDto = new TransferDto(
+                transfer.getId(),
+                transfer.getSender().getAccountName(),
+                transfer.getReceiver().getAccountName(),
+                transfer.getAmount(),
+                transfer.getTimestamp(),
+                transfer.getDescription());
+        return new TransferResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), transferDto);
 
     }
     /**

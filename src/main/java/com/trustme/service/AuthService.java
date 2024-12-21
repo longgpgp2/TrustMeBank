@@ -5,6 +5,7 @@ import java.util.*;
 import com.trustme.dto.request.UserLoginRequest;
 import com.trustme.dto.response.LoginResponse;
 import com.trustme.dto.response.UserResponse;
+import com.trustme.enums.ErrorCode;
 import com.trustme.enums.Roles;
 import com.trustme.model.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,6 @@ public class AuthService {
     PasswordEncoder passwordEncoder;
     @Autowired
     CustomUserDetailsService userDetailsService;
-    @Autowired
-    AuthService authService;
     @Autowired
     KeyService keyService;
     @Autowired
@@ -75,6 +74,8 @@ public class AuthService {
                 .build();
         userRepository.save(user);
     }
+
+
     public LoginResponse loginUser(UserLoginRequest loginRequest){
         try {
             CustomUserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
@@ -82,18 +83,21 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
                             loginRequest.getPassword()));
             if (userDetails != null) {
-                List<String> authoritiesList = authService.getJwtAuthoritiesFromRoles(userDetails);
+                List<String> authoritiesList = getJwtAuthoritiesFromRoles(userDetails);
                 User user = userDetails.getUser();
                 System.out.println(user.getUsername() + user.getPassword());
                 String token = keyService.generateJwt(user.getUsername(), authoritiesList, 3600L);
                 return new LoginResponse(HttpStatus.OK, "Login successful", token);
             }
         } catch (BadCredentialsException e) {
-            return new LoginResponse(HttpStatus.UNAUTHORIZED, "Incorrect username or password", null);
+            ErrorCode invalidCredentials = ErrorCode.INVALID_CREDENTIALS;
+            return new LoginResponse(invalidCredentials.getHttpStatus(), invalidCredentials.getErrorMessage(), null);
         } catch (UsernameNotFoundException e) {
-            new LoginResponse(HttpStatus.UNAUTHORIZED, "User not found", null);
+            ErrorCode userNotFound = ErrorCode.USER_NOT_FOUND;
+            return new LoginResponse(userNotFound.getHttpStatus(), userNotFound.getErrorMessage(), null);
         }
-        return new LoginResponse(HttpStatus.UNAUTHORIZED, "Invalid credentials", null);
+        ErrorCode invalidCredentials = ErrorCode.INVALID_CREDENTIALS;
+        return new LoginResponse(invalidCredentials.getHttpStatus(), invalidCredentials.getErrorMessage(), null);
     }
     /**
      * Extract authorities from user's role

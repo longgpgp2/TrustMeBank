@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.trustme.dto.UserDto;
+import com.trustme.enums.ErrorCode;
+import com.trustme.enums.StatusCode;
 import com.trustme.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,16 +34,16 @@ public class UsersController {
     @GetMapping("/users")
     public UsersResponse getUsers() {
         List<UserDto> users = userService.getUsers();
-        return new UsersResponse(HttpStatus.OK, "OK", users);
+        return new UsersResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), users);
     }
 
     @GetMapping("/user")
     public UserResponse getUser(@RequestParam String accountName) {
         try {
             User user = userService.findUser(accountName);
-            return new UserResponse(HttpStatus.OK, "OK", userService.getUserDto(user));
+            return new UserResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), userService.getUserDto(user));
         } catch (Exception e) {
-            return  new UserResponse(HttpStatus.NOT_ACCEPTABLE, "Invalid user", null);
+            return  new UserResponse(ErrorCode.INVALID_USER.getHttpStatus(), ErrorCode.INVALID_USER.getErrorMessage(), null);
         }
 
     }
@@ -50,10 +52,10 @@ public class UsersController {
     public UserEditResponse postUser(@RequestBody UserEditRequest userEditRequest) {
         Optional<User> optionalUser = userRepository.findByAccountName(userEditRequest.getTargetAccount());
         if (optionalUser.isEmpty())
-            return new UserEditResponse(HttpStatus.NOT_ACCEPTABLE, "Invalid user", null);
+            return new UserEditResponse(ErrorCode.INVALID_USER.getHttpStatus(), ErrorCode.INVALID_USER.getErrorMessage(), null);
         User user = optionalUser.get();
         userService.updateUser(user, userEditRequest);
         userRepository.save(user);
-        return new UserEditResponse(HttpStatus.OK, "OK", user.getAccountName());
+        return new UserEditResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), user.getAccountName());
     }
 }
