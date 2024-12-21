@@ -3,6 +3,9 @@ package com.trustme.service;
 import com.trustme.dto.UserDto;
 import com.trustme.dto.request.UserEditRequest;
 import com.trustme.dto.response.LoginResponse;
+import com.trustme.dto.response.UserEditResponse;
+import com.trustme.enums.ErrorCode;
+import com.trustme.enums.StatusCode;
 import com.trustme.model.Role;
 import com.trustme.model.User;
 import com.trustme.mapper.UserMapper;
@@ -79,6 +82,16 @@ public class UserService {
         Optional<Role> role = roleRepository.findById(userEditRequest.getRole());
         role.ifPresent(user::setRole);
         user.setDisabled(userEditRequest.isDisabled());
+    }
+
+    public UserEditResponse editUser(UserEditRequest userEditRequest) {
+        Optional<User> optionalUser = userRepository.findByAccountName(userEditRequest.getTargetAccount());
+        if (optionalUser.isEmpty())
+            return new UserEditResponse(ErrorCode.INVALID_USER.getHttpStatus(), ErrorCode.INVALID_USER.getErrorMessage(), null);
+        User user = optionalUser.get();
+        updateUser(user, userEditRequest);
+        userRepository.save(user);
+        return new UserEditResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), user.getAccountName());
     }
 //    public LoginResponse createLoginResponse(User user) {
 //        return userMapper.toUserResponse(user);

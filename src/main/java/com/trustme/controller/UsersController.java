@@ -27,8 +27,6 @@ import com.trustme.repository.UserRepository;
 @RequestMapping("/admin")
 public class UsersController {
     @Autowired
-    UserRepository userRepository;
-    @Autowired
     UserService userService;
 
     @GetMapping("/users")
@@ -50,12 +48,6 @@ public class UsersController {
 
     @PostMapping("/user")
     public UserEditResponse postUser(@RequestBody UserEditRequest userEditRequest) {
-        Optional<User> optionalUser = userRepository.findByAccountName(userEditRequest.getTargetAccount());
-        if (optionalUser.isEmpty())
-            return new UserEditResponse(ErrorCode.INVALID_USER.getHttpStatus(), ErrorCode.INVALID_USER.getErrorMessage(), null);
-        User user = optionalUser.get();
-        userService.updateUser(user, userEditRequest);
-        userRepository.save(user);
-        return new UserEditResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), user.getAccountName());
+        return userService.editUser(userEditRequest);
     }
 }
