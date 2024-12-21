@@ -50,6 +50,17 @@ public class AuthService {
      * @param registerRequest the request object containing user registration details
      * @throws UserAlreadyExistsException if the user already exists
      */
+
+    /**
+     * @comment_by: toanlemanh
+     * this method should be provided by UserService
+     * does not make use of Mapper
+     * t nghi minh ko can tao repo cho role vi minh gan role vao user luon
+     * khong co user thi role cung ko ton tai duoc
+     *
+     *  cung cap gen token o auth service thi hop ly hon
+     *
+     */
     public void registerUser(UserRegisterRequest registerRequest) {
         // User user = UserMapper.INSTANCE.toUser (registerRequest);
         Optional<Role> role = roleRepository.findById(1L);
