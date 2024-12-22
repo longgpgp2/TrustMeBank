@@ -3,12 +3,16 @@ package com.trustme.service;
 import com.trustme.dto.UserDto;
 import com.trustme.dto.request.UserEditRequest;
 import com.trustme.dto.response.LoginResponse;
+import com.trustme.exception.NotFoundException;
 import com.trustme.model.Role;
 import com.trustme.model.User;
 import com.trustme.mapper.UserMapper;
 import com.trustme.repository.RoleRepository;
 import com.trustme.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -20,7 +24,7 @@ import java.util.stream.Collectors;
  * This class contains methods for retrieving user information, updating user details, etc.
  */
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
 //    private final UserMapper userMapper;
     private final UserRepository userRepository;
@@ -31,6 +35,8 @@ public class UserService {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
     }
+
+
     /**
      * Retrieves a list of all users in the system.
      *
@@ -63,10 +69,11 @@ public class UserService {
      *
      * @param accountName the account name of the user
      * @return the User object if found
-     * @throws UserNotFoundException if the user does not exist
+     * @throws NotFoundException if the user does not exist
      */
     public User findUser(String accountName){
-        return userRepository.findByAccountName(accountName).get();
+        return userRepository.findByAccountName(accountName)
+                .orElseThrow(() -> new NotFoundException(User.builder().toString()));
     }
     /**
      * Update an existing user.
@@ -79,6 +86,11 @@ public class UserService {
         Optional<Role> role = roleRepository.findById(userEditRequest.getRole());
         role.ifPresent(user::setRole);
         user.setDisabled(userEditRequest.isDisabled());
+    }
+
+    @Override
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username).get();
     }
 //    public LoginResponse createLoginResponse(User user) {
 //        return userMapper.toUserResponse(user);
