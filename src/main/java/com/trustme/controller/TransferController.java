@@ -44,8 +44,8 @@ public class TransferController {
     public TransferResponse postTransfer(@RequestBody TransferRequest transferRequest){
         return transferService.transferMoney(transferRequest.getAmount(),transferRequest.getReceiver(), transferRequest.getDescription());
     }
-    @PostMapping("/qr-transfer")
-    public ResponseEntity<String> getQrTransfer(@RequestBody MultipartFile file){
+    @GetMapping("/qr-transfer")
+    public ResponseEntity<String> getQrTransfer(@RequestParam MultipartFile file){
         String response = null;
         try {
             BufferedImage bufferedImage = ImageIO.read(file.getInputStream());

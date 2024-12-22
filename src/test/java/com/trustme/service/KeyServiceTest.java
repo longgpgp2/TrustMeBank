@@ -9,16 +9,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class KeyServiceTest {
 
-    private KeyService keyService;
+    private AuthService authService;
 
     @BeforeEach
     void setUp(){
-        keyService = new KeyService();
+        authService = new AuthService();
     }
     @Test
     void isTokenGenerated(){
         log.info("Start creating token");
-        String jwt = keyService.generateJwt("user", null, 3600L);
+        String jwt = authService.generateJwt("user", null, 3600L);
         assert jwt!=null;
     }
     @Test

@@ -1,5 +1,6 @@
 package com.trustme.controller;
 
+import com.trustme.constant.ConstantResponses;
 import com.trustme.dto.TransferDto;
 import com.trustme.dto.response.Response;
 import com.trustme.dto.response.TransfersResponse;
@@ -31,7 +32,7 @@ public class AdminController {
         try{
              transfers = transferService.getAllTransfersHistory();
         } catch (Exception e){
-            return new TransfersResponse(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus(), ErrorCode.INTERNAL_SERVER_ERROR.getErrorMessage(), null);
+            return ConstantResponses.GET_TRANSFERS_ERROR;
         }
         return new TransfersResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), transfers);
     }

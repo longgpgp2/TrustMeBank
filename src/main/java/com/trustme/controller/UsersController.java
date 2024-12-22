@@ -4,17 +4,15 @@ import java.util.List;
 import java.util.Optional;
 
 import com.trustme.dto.UserDto;
+import com.trustme.dto.request.UserRegisterRequest;
 import com.trustme.enums.ErrorCode;
 import com.trustme.enums.StatusCode;
+import com.trustme.mapper.CustomUserMapper;
+import com.trustme.service.AuthService;
 import com.trustme.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.trustme.dto.request.UserEditRequest;
 import com.trustme.dto.response.UserEditResponse;
@@ -28,7 +26,8 @@ import com.trustme.repository.UserRepository;
 public class UsersController {
     @Autowired
     UserService userService;
-
+    @Autowired
+    AuthService authService;
     @GetMapping("/users")
     public UsersResponse getUsers() {
         List<UserDto> users = userService.getUsers();
@@ -39,15 +38,24 @@ public class UsersController {
     public UserResponse getUser(@RequestParam String accountName) {
         try {
             User user = userService.findUser(accountName);
-            return new UserResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), userService.getUserDto(user));
+            return new UserResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), CustomUserMapper.getUserDto(user));
         } catch (Exception e) {
             return  new UserResponse(ErrorCode.INVALID_USER.getHttpStatus(), ErrorCode.INVALID_USER.getErrorMessage(), null);
         }
 
     }
-
     @PostMapping("/user")
-    public UserEditResponse postUser(@RequestBody UserEditRequest userEditRequest) {
+    public UserResponse postUser(@RequestBody UserRegisterRequest userRegisterRequest) {
+        return authService.registerUser(userRegisterRequest);
+    }
+
+    @PatchMapping("/user")
+    public UserEditResponse putUser(@RequestBody UserEditRequest userEditRequest) {
+        return userService.editUser(userEditRequest);
+    }
+
+    @DeleteMapping("/user")
+    public UserEditResponse deleteUser(@RequestBody UserEditRequest userEditRequest) {
         return userService.editUser(userEditRequest);
     }
 }

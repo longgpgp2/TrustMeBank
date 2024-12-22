@@ -1,23 +1,26 @@
 package com.trustme.service;
 
+import java.security.SecureRandom;
 import java.util.*;
 
+import com.trustme.constant.ConstantResponses;
 import com.trustme.dto.request.UserLoginRequest;
 import com.trustme.dto.response.LoginResponse;
 import com.trustme.dto.response.UserResponse;
-import com.trustme.enums.ErrorCode;
 import com.trustme.enums.Roles;
+import com.trustme.enums.StatusCode;
+import com.trustme.mapper.CustomUserMapper;
 import com.trustme.model.CustomUserDetails;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.trustme.dto.request.UserRegisterRequest;
@@ -26,8 +29,8 @@ import com.trustme.model.User;
 import com.trustme.repository.RoleRepository;
 import com.trustme.repository.UserRepository;
 /**
- * Service class for handling authentication-related operations.
- * This class contains methods for user registration, login, and other authentication functionalities.
+ * Service class for handling authentication-related and jwt encoding operations.
+ * This class contains methods for generating signing keys and jwt, user registration, login, and other authentication functionalities.
  */
 @Service
 public class AuthService {
@@ -40,9 +43,9 @@ public class AuthService {
     @Autowired
     CustomUserDetailsService userDetailsService;
     @Autowired
-    KeyService keyService;
-    @Autowired
     AuthenticationManager authenticationManager;
+    String ENCODED_SIGNING_KEY_BASE64 = "BynaRVN1R8shGkku6SmSnQJzGc8ZSs7aTQzDRlnD2ckNfZ+EDEInq0ap6Ktqcm6meg3sNQaLyDGOCRw6eMC1Vg==";
+
     /**
      * Registers a new user in the system.
      *
@@ -60,7 +63,7 @@ public class AuthService {
      *  cung cap gen token o auth service thi hop ly hon
      *
      */
-    public void registerUser(UserRegisterRequest registerRequest) {
+    public UserResponse registerUser(UserRegisterRequest registerRequest) {
         // User user = UserMapper.INSTANCE.toUser (registerRequest);
         Optional<Role> role = roleRepository.findById(1L);
         System.out.println(registerRequest.toString());
@@ -73,6 +76,7 @@ public class AuthService {
                 .role(role.get())
                 .build();
         userRepository.save(user);
+        return new UserResponse(StatusCode.CREATED.getHttpStatus(),StatusCode.CREATED.getStatusMessage(), CustomUserMapper.getUserDto(user));
     }
 
 
@@ -86,18 +90,15 @@ public class AuthService {
                 List<String> authoritiesList = getJwtAuthoritiesFromRoles(userDetails);
                 User user = userDetails.getUser();
                 System.out.println(user.getUsername() + user.getPassword());
-                String token = keyService.generateJwt(user.getUsername(), authoritiesList, 3600L);
+                String token = generateJwt(user.getUsername(), authoritiesList, 3600L);
                 return new LoginResponse(HttpStatus.OK, "Login successful", token);
             }
         } catch (BadCredentialsException e) {
-            ErrorCode invalidCredentials = ErrorCode.INVALID_CREDENTIALS;
-            return new LoginResponse(invalidCredentials.getHttpStatus(), invalidCredentials.getErrorMessage(), null);
+            return ConstantResponses.INVALID_CREDENTIALS;
         } catch (UsernameNotFoundException e) {
-            ErrorCode userNotFound = ErrorCode.USER_NOT_FOUND;
-            return new LoginResponse(userNotFound.getHttpStatus(), userNotFound.getErrorMessage(), null);
+            return ConstantResponses.USER_NOT_FOUND;
         }
-        ErrorCode invalidCredentials = ErrorCode.INVALID_CREDENTIALS;
-        return new LoginResponse(invalidCredentials.getHttpStatus(), invalidCredentials.getErrorMessage(), null);
+        return ConstantResponses.INVALID_CREDENTIALS;
     }
     /**
      * Extract authorities from user's role
@@ -113,5 +114,38 @@ public class AuthService {
         roles.stream().forEach(role -> authorities.addAll(role.getAuthorities()));
         List<String> authoritiesList = authorities.stream().toList();
         return authoritiesList;
+    }
+
+
+    public String generateSigningKey() {
+        byte[] key = new byte[64];
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextBytes(key);
+
+        String signingKey = Base64.getEncoder().encodeToString(key);
+        System.out.println("Generated Signing Key (Base64): " + signingKey);
+        return signingKey;
+    }
+    /**
+     * Generate a jwt based on the given username, scopes, and time.
+     * @param username name of the authenticated user
+     * @param scopes authorities according to user's roles
+     * @param timeMillis life duration of the token
+     * @return a jwt string that is then sent back to the client
+     * */
+    public String generateJwt(String username, List<String> scopes, Long timeMillis) {
+
+        byte[] key = Base64.getDecoder().decode(ENCODED_SIGNING_KEY_BASE64);
+
+        String jwt = Jwts.builder()
+                .setSubject(username)
+                .setIssuer("https://localhost:8080/auth")
+                .setAudience("https://localhost:8080/api")
+                .claim("scope", scopes)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + timeMillis * 1000))
+                .signWith(SignatureAlgorithm.HS512, key)
+                .compact();
+        return jwt;
     }
 }

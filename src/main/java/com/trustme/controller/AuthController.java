@@ -2,17 +2,14 @@ package com.trustme.controller;
 
 import java.util.List;
 
-import com.trustme.service.KeyService;
+import com.trustme.constant.ConstantResponses;
+import com.trustme.dto.response.UserResponse;
+import com.trustme.exception.exceptions.UsernameNotAvailableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trustme.dto.request.UserLoginRequest;
 import com.trustme.dto.request.UserRegisterRequest;
 import com.trustme.dto.response.LoginResponse;
-import com.trustme.model.CustomUserDetails;
-import com.trustme.model.User;
 import com.trustme.service.AuthService;
 import com.trustme.service.CustomUserDetailsService;
 
@@ -55,13 +50,18 @@ public class AuthController {
      *  gui response tuong ung
      */
     @PostMapping("/register")
-    public ResponseEntity<String> postRegister(@RequestBody UserRegisterRequest registerRequest) {
-        UserDetails user = userDetailsService.loadUserByUsername(registerRequest.getUsername());
-        if (user != null) {
-            return new ResponseEntity<String>("User already exists", HttpStatus.NOT_ACCEPTABLE);
+    public UserResponse postRegister(@RequestBody UserRegisterRequest registerRequest) {
+        try{
+            UserDetails user = userDetailsService.loadUserByUsername(registerRequest.getUsername());
+            if (user != null) {
+                throw new UsernameNotAvailableException();
+            }
+            return authService.registerUser(registerRequest);
         }
-        authService.registerUser(registerRequest);
-        return new ResponseEntity<String>("User created successfully", HttpStatus.OK);
+        catch (UsernameNotAvailableException e){
+            return ConstantResponses.USER_EXISTED;
+        }
+
     }
 
     @GetMapping("/login")
