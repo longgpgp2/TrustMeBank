@@ -31,12 +31,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserService {
-
-//    private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
-    @Autowired
     public UserService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;

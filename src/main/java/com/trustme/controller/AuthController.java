@@ -26,10 +26,13 @@ import com.trustme.service.CustomUserDetailsService;
 @RestController()
 @RequestMapping("/auth")
 public class AuthController {
-    @Autowired
-    CustomUserDetailsService userDetailsService;
-    @Autowired
-    AuthService authService;
+    private final CustomUserDetailsService userDetailsService;
+    private final AuthService authService;
+
+    public AuthController(CustomUserDetailsService userDetailsService, AuthService authService) {
+        this.userDetailsService = userDetailsService;
+        this.authService = authService;
+    }
 
     @GetMapping("/")
     public ResponseEntity<String> home() {
@@ -50,16 +53,17 @@ public class AuthController {
      *  gui response tuong ung
      */
     @PostMapping("/register")
-    public UserResponse postRegister(@RequestBody UserRegisterRequest registerRequest) {
+    public ResponseEntity<UserResponse> postRegister(@RequestBody UserRegisterRequest registerRequest) {
         try{
             UserDetails user = userDetailsService.loadUserByUsername(registerRequest.getUsername());
             if (user != null) {
                 throw new UsernameNotAvailableException();
             }
-            return authService.registerUser(registerRequest);
+            UserResponse userResponse = authService.registerUser(registerRequest);
+            return ResponseEntity.status(userResponse.getCode()).body(userResponse);
         }
         catch (UsernameNotAvailableException e){
-            return ConstantResponses.USER_EXISTED;
+            return ResponseEntity.status(ConstantResponses.USER_EXISTED.getCode()).body(ConstantResponses.USER_EXISTED);
         }
 
     }
@@ -70,23 +74,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse postLogin(@RequestBody UserLoginRequest loginRequest) {
-        return authService.loginUser(loginRequest);
+    public ResponseEntity<LoginResponse> postLogin(@RequestBody UserLoginRequest loginRequest) {
+        LoginResponse loginResponse = authService.loginUser(loginRequest);
+        return ResponseEntity.status(loginResponse.getCode()).body(loginResponse);
     }
 
-    @GetMapping("/info")
-    public String getUserInfo(@AuthenticationPrincipal Jwt jwt) {
-        if (jwt != null) {
-            List<String> scope = jwt.getClaim("scope");
-
-            if (scope != null && !scope.isEmpty()) {
-                System.out.println("Scopes: " + String.join(", ", scope));
-                return "Authenticated User with scopes: " + String.join(", ", scope);
-            } else {
-                return "Authenticated User, but no scopes found.";
-            }
-        } else {
-            return "No user authenticated";
-        }
-    }
 }

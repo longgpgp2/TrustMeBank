@@ -1,6 +1,8 @@
 package com.trustme.mapper;
 
 import com.trustme.dto.TransferDto;
+import com.trustme.dto.request.TransferRequest;
+import com.trustme.model.PendingTransfer;
 import com.trustme.model.Transfer;
 
 import java.util.List;
@@ -27,5 +29,15 @@ public class CustomTransferMapper {
                 transfer.getAmount(),
                 transfer.getTimestamp(),
                 transfer.getDescription());
+    }
+
+    public static PendingTransfer toPendingTransfer(TransferRequest transfer, String name){
+        return PendingTransfer.builder()
+                .senderName(name)
+                .receiverName(transfer.getReceiver())
+                .description(transfer.getDescription())
+                .amount(transfer.getAmount())
+                .build()
+                ;
     }
 }

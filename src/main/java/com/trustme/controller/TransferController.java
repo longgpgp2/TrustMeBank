@@ -9,12 +9,16 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.trustme.dto.request.TransferRequest;
 import com.trustme.dto.response.TransferResponse;
 import com.trustme.dto.response.TransfersResponse;
+import com.trustme.model.PendingTransfer;
 import com.trustme.service.AuthService;
 import com.trustme.service.QRCodeService;
 import com.trustme.service.TransferService;
 import com.trustme.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,24 +30,62 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api")
 public class TransferController {
-    @Autowired
-    QRCodeService qrCodeService;
-    @Autowired
-    TransferService transferService;
-    @Autowired
-    AuthService authService;
+    private static final Logger log = LoggerFactory.getLogger(TransferController.class);
+
+    private final QRCodeService qrCodeService;
+    private final TransferService transferService;
+
+    public TransferController(QRCodeService qrCodeService, TransferService transferService) {
+        this.qrCodeService = qrCodeService;
+        this.transferService = transferService;
+    }
+
     @GetMapping("/transfer")
     public ResponseEntity<String> getTransfer(){
         return ResponseEntity.ok("Choose an account to transfer money to.");
     }
     @PostMapping("/transfer")
-    public TransferResponse postTransfer(@RequestBody TransferRequest transferRequest){
-        return transferService.transferMoney(transferRequest.getAmount(),transferRequest.getReceiver(), transferRequest.getDescription());
+    public ResponseEntity<Void> postTransfer(@RequestBody TransferRequest transferRequest){
+        transferService.startProcessingTransfer(transferRequest);
+        URI nextStep = URI.create("/api/transfer/step-one");
+        log.info("Proceeding to the first transaction step!");
+        return ResponseEntity.status(HttpStatus.FOUND).location(nextStep).build();
     }
+    @GetMapping("/transfer/step-one")
+    public ResponseEntity<String> stepOneGet() {
+        return ResponseEntity.status(HttpStatus.FOUND).body("Please confirm your transaction!");
+
+    }
+    @PostMapping("/transfer/step-one")
+    public ResponseEntity<Void> stepOne() {
+        URI nextStep = URI.create("/api/transfer/step-two");
+        log.info("Proceeding to the second transaction step!");
+        return ResponseEntity.status(HttpStatus.FOUND).location(nextStep).build();
+    }
+    @GetMapping("/transfer/step-two")
+    public ResponseEntity<String> stepTwoGet() {
+        return ResponseEntity.status(HttpStatus.FOUND).body("Finishing transaction!");
+    }
+
+    @PostMapping("/transfer/step-two")
+    public ResponseEntity<TransferResponse> stepTwo() {
+        PendingTransfer pendingTransfer = transferService.getPendingTransfer();
+
+        TransferResponse transferResponse = transferService.transferMoney(pendingTransfer.getAmount(),
+                pendingTransfer.getReceiverName(),
+                pendingTransfer.getDescription());
+        return ResponseEntity.status(transferResponse.getCode()).body(transferResponse);
+    }
+
+
+
+
+
     @GetMapping("/qr-transfer")
     public ResponseEntity<String> getQrTransfer(@RequestParam MultipartFile file){
         String response = null;

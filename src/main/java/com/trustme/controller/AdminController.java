@@ -20,20 +20,29 @@ import java.util.Map;
 @RestController()
 @RequestMapping("/admin")
 public class AdminController {
-    @Autowired
-    TransferService transferService;
+    private final TransferService transferService;
+
+    public AdminController(TransferService transferService) {
+        this.transferService = transferService;
+    }
+
     @GetMapping("/dashboard")
-    public Response<String> getDashboard(){
-        return new Response(StatusCode.OK.getHttpStatus(),"Welcome to admin dashboard", null);
+    public ResponseEntity<String> getDashboard(){
+        return ResponseEntity.status(StatusCode.OK.getHttpStatus()).body("Welcome to admin dashboard");
     }
     @GetMapping("/transfers")
-    public TransfersResponse getTransfers(){
+    public ResponseEntity<TransfersResponse> getTransfers(){
         List<TransferDto> transfers = null;
         try{
              transfers = transferService.getAllTransfersHistory();
         } catch (Exception e){
-            return ConstantResponses.GET_TRANSFERS_ERROR;
+            return ResponseEntity
+                    .status(ConstantResponses.GET_TRANSFERS_ERROR.getCode())
+                    .body(ConstantResponses.GET_TRANSFERS_ERROR);
         }
-        return new TransfersResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), transfers);
+        TransfersResponse transfersResponse = new TransfersResponse(StatusCode.OK.getHttpStatus(),
+                StatusCode.OK.getStatusMessage(),
+                transfers);
+        return ResponseEntity.status(transfersResponse.getCode()).body(transfersResponse);
     }
 }
