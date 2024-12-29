@@ -94,7 +94,7 @@ public class AuthService {
                 User user = userDetails.getUser();
                 System.out.println(user.getUsername() + user.getPassword());
                 String token = generateJwt(user.getUsername(), authoritiesList, 3600L);
-                return new LoginResponse(HttpStatus.OK, "Login successful", token);
+                return new LoginResponse(200, "Login successful", token);
             }
         } catch (BadCredentialsException e) {
             return ConstantResponses.INVALID_CREDENTIALS;

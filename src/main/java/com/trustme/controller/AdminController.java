@@ -40,7 +40,7 @@ public class AdminController {
                     .status(ConstantResponses.GET_TRANSFERS_ERROR.getCode())
                     .body(ConstantResponses.GET_TRANSFERS_ERROR);
         }
-        TransfersResponse transfersResponse = new TransfersResponse(StatusCode.OK.getHttpStatus(),
+        TransfersResponse transfersResponse = new TransfersResponse(200,
                 StatusCode.OK.getStatusMessage(),
                 transfers);
         return ResponseEntity.status(transfersResponse.getCode()).body(transfersResponse);

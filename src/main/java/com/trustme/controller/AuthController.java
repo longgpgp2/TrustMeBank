@@ -1,16 +1,12 @@
 package com.trustme.controller;
 
-import java.util.List;
-
 import com.trustme.constant.ConstantResponses;
 import com.trustme.dto.response.UserResponse;
 import com.trustme.exception.exceptions.UsernameNotAvailableException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,10 +30,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<String> home() {
-        return new ResponseEntity<String>("message", HttpStatus.OK);
-    }
 
     @GetMapping("/register")
     public ResponseEntity<String> getRegister() {
@@ -54,17 +46,15 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<UserResponse> postRegister(@RequestBody UserRegisterRequest registerRequest) {
+        System.out.println(registerRequest.getUsername() + ", " + registerRequest.getPassword() + ", " + registerRequest.getAccountName() + ", " +registerRequest.getPinCode());
         try{
-            UserDetails user = userDetailsService.loadUserByUsername(registerRequest.getUsername());
-            if (user != null) {
-                throw new UsernameNotAvailableException();
-            }
+            userDetailsService.loadUserByUsername(registerRequest.getUsername());
+        }
+        catch (UsernameNotFoundException e){
             UserResponse userResponse = authService.registerUser(registerRequest);
             return ResponseEntity.status(userResponse.getCode()).body(userResponse);
         }
-        catch (UsernameNotAvailableException e){
-            return ResponseEntity.status(ConstantResponses.USER_EXISTED.getCode()).body(ConstantResponses.USER_EXISTED);
-        }
+        return ResponseEntity.status(ConstantResponses.USER_EXISTED.getCode()).body(ConstantResponses.USER_EXISTED);
 
     }
 
@@ -77,6 +67,11 @@ public class AuthController {
     public ResponseEntity<LoginResponse> postLogin(@RequestBody UserLoginRequest loginRequest) {
         LoginResponse loginResponse = authService.loginUser(loginRequest);
         return ResponseEntity.status(loginResponse.getCode()).body(loginResponse);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<LoginResponse> testAPI(){
+        return ResponseEntity.ok().body(new LoginResponse(200, "this is the test message","this is the test token" ));
     }
 
 }

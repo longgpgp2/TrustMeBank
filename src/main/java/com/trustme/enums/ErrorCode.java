@@ -1,40 +1,32 @@
 package com.trustme.enums;
+
 import lombok.Getter;
-import lombok.Setter;
-import org.springframework.http.HttpStatus;
 
 /*
   @Description: This class is for error code and message representations
  */
 @Getter
 public enum ErrorCode {
-    RECEIVER_NOT_FOUND (4000, "Receiver not found!", HttpStatus.BAD_REQUEST),
-    INVALID_AMOUNT (4000, "Invalid amount!", HttpStatus.BAD_REQUEST),
-    USER_EXISTS(4000, "User existed!", HttpStatus.BAD_REQUEST),
-    INVALID_USER (4000, "User not found!", HttpStatus.BAD_REQUEST),
-    INVALID_CREDENTIALS (4001, "Invalid username or password!", HttpStatus.BAD_REQUEST),
-    INVALID_USERNAME(4002, "Username must be at least 8 characters!", HttpStatus.BAD_REQUEST),
-    INVALID_PASSWORD(4003, "Password must be at least 8 characters!", HttpStatus.BAD_REQUEST),
-    USER_NOT_FOUND(4004, "User is not found!", HttpStatus.NOT_FOUND),
-    UNCATEGORIZED_ERROR (4444, "Uncategorized error !", HttpStatus.BAD_REQUEST),
-    USER_NOT_EXIST ( 4005, "User does not exist", HttpStatus.BAD_REQUEST),
-    UNAUTHENTICATED (4006, "Unauthenticated!", HttpStatus.UNAUTHORIZED),
-    NO_CONTENT(2004, "No Content!", HttpStatus.NO_CONTENT),
-    UNAUTHORIZED (4007, "You do not have permission", HttpStatus.FORBIDDEN),
-    INTERNAL_SERVER_ERROR (5000, "Internal server error!", HttpStatus.INTERNAL_SERVER_ERROR),
+    RECEIVER_NOT_FOUND("Receiver not found!", 400),
+    INVALID_AMOUNT("Invalid amount!", 400),
+    USER_EXISTS("User existed!", 400),
+    INVALID_USER( "User not found!", 400),
+    INVALID_CREDENTIALS("Invalid username or password!", 400),
+    INVALID_USERNAME("Username must be at least 8 characters!", 400),
+    INVALID_PASSWORD( "Password must be at least 8 characters!", 400),
+    USER_NOT_FOUND("User is not found!", 404),
+    UNCATEGORIZED_ERROR("Uncategorized error!", 400),
+    USER_NOT_EXIST("User does not exist", 400),
+    UNAUTHENTICATED( "Unauthenticated!", 401),
+    NO_CONTENT("No Content!", 204),
+    UNAUTHORIZED("You do not have permission", 403),
+    INTERNAL_SERVER_ERROR( "Internal server error!", 500);
 
-
-            ;
-
-    private int code;
     private String errorMessage;
-    private HttpStatus httpStatus;
+    private int httpStatus; // Change HttpStatus to int
 
-    ErrorCode(int errorCode, String errorMessage, HttpStatus httpStatus) {
-        this.code = errorCode;
+    ErrorCode(String errorMessage, int httpStatus) {
         this.errorMessage = errorMessage;
         this.httpStatus = httpStatus;
     }
-
-
 }
