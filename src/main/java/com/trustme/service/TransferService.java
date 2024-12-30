@@ -6,11 +6,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.trustme.constant.ConstantResponses;
+import com.trustme.dto.request.TransferRequest;
 import com.trustme.dto.response.TransferResponse;
 import com.trustme.dto.response.TransfersResponse;
 import com.trustme.enums.ErrorCode;
 import com.trustme.enums.StatusCode;
+import com.trustme.exception.exceptions.AccountNotFoundException;
 import com.trustme.mapper.CustomTransferMapper;
+import com.trustme.model.PendingTransfer;
+import com.trustme.repository.PendingTransferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +36,16 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class TransferService {
-    @Autowired
-    TransferRepository transferRepository;
-    @Autowired
-    UserRepository userRepository;
+    private final TransferRepository transferRepository;
+    private final UserRepository userRepository;
+    private final PendingTransferRepository pendingTransferRepository;
+
+    public TransferService(TransferRepository transferRepository, UserRepository userRepository, PendingTransferRepository pendingTransferRepository) {
+        this.transferRepository = transferRepository;
+        this.userRepository = userRepository;
+        this.pendingTransferRepository = pendingTransferRepository;
+    }
+
     /**
      * Processes a money transfer from one user to another.
      *
@@ -66,6 +76,7 @@ public class TransferService {
         }
         Transfer transfer = saveTransfer(sender, receiver, amount, description);
         TransferDto transferDto = CustomTransferMapper.toTransferDto(transfer);
+        deletePendingTransfer();
         return new TransferResponse(StatusCode.OK.getHttpStatus(), StatusCode.OK.getStatusMessage(), transferDto);
     }
 
@@ -102,5 +113,40 @@ public class TransferService {
     public List<TransferDto> getAllTransfersHistory() {
         List<Transfer> transfers = transferRepository.findAll();
         return CustomTransferMapper.toTransferDtos(transfers);
+    }
+    /**
+     * Save the transfer request as a PendingTransfer
+     *
+     * @param transferRequest representing user current working transfer request
+     */
+    public void startProcessingTransfer(TransferRequest transferRequest){
+        String senderName = getCurrentAccountName();
+        pendingTransferRepository.save(CustomTransferMapper.toPendingTransfer(transferRequest, senderName));
+    }
+    /**
+     * Retrieve the pending transfer
+     *
+     * @return a pending transfer of the current user
+     */
+    public PendingTransfer getPendingTransfer(){
+        String senderName = pendingTransferRepository.findBySenderName(getCurrentAccountName()).getSenderName();
+        return pendingTransferRepository.findBySenderName(senderName);
+    }
+    /**
+     * Delete the current user's pending transfer
+     */
+    public void deletePendingTransfer(){
+        pendingTransferRepository.delete(getPendingTransfer());
+    }
+    /**
+     * Retrieve the current user's account name
+     *
+     * @return account name of the current user
+     */
+    public String getCurrentAccountName(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Optional<User> user = userRepository.findByUsername(jwt.getSubject());
+        return user.get().getAccountName();
     }
 }

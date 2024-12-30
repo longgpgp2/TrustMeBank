@@ -13,6 +13,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+
 /**
  * String Configuration Component for configuring Spring Security & Oauth2, jwt functionalities
  */
@@ -52,11 +54,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin/transactions").hasAuthority("transaction:manage")
                         .requestMatchers("/admin/**").hasAuthority("admin:read")
                         .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/auth/info").authenticated()
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().permitAll())
-                .formLogin(login -> login
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/admin/dashboard", true))
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                         .jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))

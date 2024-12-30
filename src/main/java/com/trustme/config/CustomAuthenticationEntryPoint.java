@@ -15,6 +15,7 @@ import java.io.IOException;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        System.out.println("Unauthorized request! Redirecting to login page!");
+        response.sendRedirect("/auth/login");
     }
 }

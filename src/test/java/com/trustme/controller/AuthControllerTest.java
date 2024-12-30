@@ -8,7 +8,10 @@ import com.trustme.dto.response.LoginResponse;
 import com.trustme.service.AuthService;
 import com.trustme.service.CustomUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,7 +21,10 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @Slf4j
@@ -27,20 +33,19 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
-    @MockitoBean
-    private CustomUserDetailsService customUserDetailsService;
-    @MockitoBean
-    private AuthService authService;
-    UserLoginRequest userLoginRequest;
-    UserRegisterRequest userRegisterRequest;
+    ObjectMapper objectMapper = new ObjectMapper();
+    String token;
+    UserLoginRequest loginRequest;
+    UserRegisterRequest registerRequest;
     @BeforeEach
-    void initData(){
-        userLoginRequest = UserLoginRequest.builder()
+    void initData() throws Exception {
+        loginRequest = UserLoginRequest.builder()
                 .username("user3")
                 .password("123456")
                 .build();
-        userRegisterRequest = UserRegisterRequest.builder()
+        registerRequest = UserRegisterRequest.builder()
                 .accountName("user3")
+                .username("user3")
                 .pinCode("1234")
                 .password("123456")
                 .build();
@@ -48,18 +53,33 @@ public class AuthControllerTest {
     }
 
     @Test
-    void isUserRegisteredSuccessfully() throws Exception {
-        log.info("registering user");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String content = objectMapper.writeValueAsString(userRegisterRequest);
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(content))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+    void isRegisterWorking() throws Exception {
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)));
 
-//
-//        LoginResponse loginResponse = authService.loginUser(userLoginRequest);
-//        assert loginResponse.getCode().equals(HttpStatusCode.valueOf(200));
+        MvcResult result = response.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+
+    }
+    @Test
+    void isLoginWorking() throws Exception {
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)));
+
+        MvcResult result = response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.result", Matchers.notNullValue()))
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+        String jsonResponse = result.getResponse().getContentAsString();
+        System.out.println(jsonResponse);
+        LoginResponse loginResponse = objectMapper.readValue(jsonResponse, LoginResponse.class);
+        token = loginResponse.getResult();
     }
 }

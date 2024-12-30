@@ -15,11 +15,13 @@ import com.trustme.service.AuthService;
  * */
 @Component
 public class Initializer implements CommandLineRunner {
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
+    private final AuthService authService;
 
-    @Autowired
-    AuthService authService;
+    public Initializer(RoleRepository roleRepository, AuthService authService) {
+        this.roleRepository = roleRepository;
+        this.authService = authService;
+    }
 
     @Override
     public void run(String... args) throws Exception {

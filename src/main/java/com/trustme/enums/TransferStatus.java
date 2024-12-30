@@ -1,7 +1,5 @@
 package com.trustme.enums;
 
-import org.springframework.http.HttpStatus;
-
 public enum TransferStatus {
     PENDING( "Transaction is been processing!"),
     COMPLETED( "Transaction is completed!"),

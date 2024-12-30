@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.util.*;
 
 import com.trustme.constant.ConstantResponses;
+import com.trustme.dto.UserDto;
 import com.trustme.dto.request.UserLoginRequest;
 import com.trustme.dto.response.LoginResponse;
 import com.trustme.dto.response.UserResponse;
@@ -18,9 +19,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.trustme.dto.request.UserRegisterRequest;
@@ -34,17 +38,20 @@ import com.trustme.repository.UserRepository;
  */
 @Service
 public class AuthService {
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    RoleRepository roleRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
-    CustomUserDetailsService userDetailsService;
-    @Autowired
-    AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final CustomUserDetailsService userDetailsService;
+    private final AuthenticationManager authenticationManager;
     String ENCODED_SIGNING_KEY_BASE64 = "BynaRVN1R8shGkku6SmSnQJzGc8ZSs7aTQzDRlnD2ckNfZ+EDEInq0ap6Ktqcm6meg3sNQaLyDGOCRw6eMC1Vg==";
+
+    public AuthService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, CustomUserDetailsService userDetailsService, AuthenticationManager authenticationManager) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userDetailsService = userDetailsService;
+        this.authenticationManager = authenticationManager;
+    }
 
     /**
      * Registers a new user in the system.
@@ -91,7 +98,7 @@ public class AuthService {
                 User user = userDetails.getUser();
                 System.out.println(user.getUsername() + user.getPassword());
                 String token = generateJwt(user.getUsername(), authoritiesList, 3600L);
-                return new LoginResponse(HttpStatus.OK, "Login successful", token);
+                return new LoginResponse(200, "Login successful", token);
             }
         } catch (BadCredentialsException e) {
             return ConstantResponses.INVALID_CREDENTIALS;
@@ -100,6 +107,19 @@ public class AuthService {
         }
         return ConstantResponses.INVALID_CREDENTIALS;
     }
+
+    /**
+     * Retrieve the current logged in userDto
+     *
+     * @return UserDto of the current user
+     */
+    public UserDto getCurrentUserDto(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Optional<User> user = userRepository.findByUsername(jwt.getSubject());
+        return CustomUserMapper.getUserDto(user.get());
+    }
+
     /**
      * Extract authorities from user's role
      * @param user authenticated user

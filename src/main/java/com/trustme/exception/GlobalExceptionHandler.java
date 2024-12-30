@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<Response> handlingRuntimeException (RuntimeException exception){
         Response errorBody = Response.builder()
-                .code(HttpStatusCode.valueOf(400))
+                .code(400)
                 .message("Something wrong in runtime!")
                 .build();
 
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = UsernameNotFoundException.class)
     public ResponseEntity<Response> handlingUsernameNotFoundException (UsernameNotFoundException exception){
         Response errorBody = Response.builder()
-                .code(HttpStatusCode.valueOf(400))
+                .code(400)
                 .message(exception.getMessage())
                 .build();
 
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = AccountNotFoundException.class)
     public ResponseEntity<Response> handlingUsernameNotFoundException (AccountNotFoundException exception){
         Response errorBody = Response.builder()
-                .code(HttpStatusCode.valueOf(400))
+                .code(400)
                 .message(exception.getMessage())
                 .build();
 
