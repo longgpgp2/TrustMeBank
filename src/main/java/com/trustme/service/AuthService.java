@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.util.*;
 
 import com.trustme.constant.ConstantResponses;
+import com.trustme.dto.UserDto;
 import com.trustme.dto.request.UserLoginRequest;
 import com.trustme.dto.response.LoginResponse;
 import com.trustme.dto.response.UserResponse;
@@ -18,9 +19,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.trustme.dto.request.UserRegisterRequest;
@@ -103,6 +107,19 @@ public class AuthService {
         }
         return ConstantResponses.INVALID_CREDENTIALS;
     }
+
+    /**
+     * Retrieve the current logged in userDto
+     *
+     * @return UserDto of the current user
+     */
+    public UserDto getCurrentUserDto(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Optional<User> user = userRepository.findByUsername(jwt.getSubject());
+        return CustomUserMapper.getUserDto(user.get());
+    }
+
     /**
      * Extract authorities from user's role
      * @param user authenticated user

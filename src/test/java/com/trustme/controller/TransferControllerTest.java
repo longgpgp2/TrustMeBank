@@ -46,9 +46,10 @@ public class TransferControllerTest {
     }
     @Test
     void shouldReturnATransferAfterTransfering() throws Exception {
+        log.info("Testing transfer");
         TransferRequest transferRequest = TransferRequest.builder()
                 .amount(100.0)
-                .description("No desc")
+                .description("No Desc")
                 .receiver("user2")
                 .build();
         String content = objectMapper.writeValueAsString(transferRequest);
@@ -62,11 +63,28 @@ public class TransferControllerTest {
 
     }
 
+    @Test
+    void shouldReturnAllTransfers() throws Exception {
+        log.info("Retrieving all transfers");
+        MvcResult response = performGet("/admin/transfers")
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        System.out.println(response.getResponse().getContentAsString());
+
+    }
+
     public ResultActions performPost(String content, String url) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders
                 .post(url)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
+    }
+    public ResultActions performGet(String url) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders
+                .get(url)
+                .header("Authorization", "Bearer " + token));
     }
 }

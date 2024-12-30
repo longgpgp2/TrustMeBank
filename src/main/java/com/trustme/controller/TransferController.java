@@ -49,13 +49,16 @@ public class TransferController {
     public ResponseEntity<String> getTransfer(){
         return ResponseEntity.ok("Choose an account to transfer money to.");
     }
+
     @PostMapping("/transfer")
     public ResponseEntity<Void> postTransfer(@RequestBody TransferRequest transferRequest){
+        // bat dau transaction
         transferService.startProcessingTransfer(transferRequest);
         URI nextStep = URI.create("/api/transfer/step-one");
         log.info("Proceeding to the first transaction step!");
         return ResponseEntity.status(HttpStatus.FOUND).location(nextStep).build();
     }
+
     @GetMapping("/transfer/step-one")
     public ResponseEntity<String> stepOneGet() {
         return ResponseEntity.status(HttpStatus.FOUND).body("Please confirm your transaction!");
@@ -63,6 +66,7 @@ public class TransferController {
     }
     @PostMapping("/transfer/step-one")
     public ResponseEntity<Void> stepOne() {
+        // next step: validate pin ...
         URI nextStep = URI.create("/api/transfer/step-two");
         log.info("Proceeding to the second transaction step!");
         return ResponseEntity.status(HttpStatus.FOUND).location(nextStep).build();
@@ -74,6 +78,7 @@ public class TransferController {
 
     @PostMapping("/transfer/step-two")
     public ResponseEntity<TransferResponse> stepTwo() {
+        // validate OTP
         PendingTransfer pendingTransfer = transferService.getPendingTransfer();
 
         TransferResponse transferResponse = transferService.transferMoney(pendingTransfer.getAmount(),
