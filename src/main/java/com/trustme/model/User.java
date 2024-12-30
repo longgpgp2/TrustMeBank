@@ -1,6 +1,7 @@
 package com.trustme.model;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -38,17 +39,26 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String accountName;
 
-    @Column(nullable = false, length = 6)
+    @Column(nullable = false, length = 6, unique = true)
     private String pinCode;
 
     @Column(nullable = false, columnDefinition = "DOUBLE DEFAULT 1000")
     private Double balance = 1000.0;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 8)
     private String password;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false, unique = true)
+    private String phone;
+
+    @Column(nullable = true)
+    private LocalDateTime dob;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", referencedColumnName = "id")

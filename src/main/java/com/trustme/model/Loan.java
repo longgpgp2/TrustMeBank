@@ -1,41 +1,49 @@
 package com.trustme.model;
 
-import java.time.LocalDateTime;
-
 import com.trustme.enums.TransferStatus;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
-//@Builder
-@Table(name = "transfers")
+@Builder
 @NoArgsConstructor
-public class Transfer {
+public class Loan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", referencedColumnName = "id")
-    private User sender;
+    @JoinColumn(name = "borrower_id", referencedColumnName = "id")
+    private User borrower;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id", referencedColumnName = "id")
-    private User receiver;
-    //need @GreaterThan annotation
     @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0")
     private Double amount = 0.0;
 
+    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0")
+    private Double interestRate = 0.0;
+
+    @Column(nullable = false)
+    private LocalDateTime startDate;
+
+    @Column(nullable = false)
+    private LocalDateTime endDate;
+
     @CreatedDate
-    private LocalDateTime timestamp;
+    @Column(updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
     private String description;
 
