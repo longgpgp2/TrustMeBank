@@ -15,7 +15,7 @@ import org.springframework.data.annotation.CreatedDate;
 @Getter
 @Setter
 @AllArgsConstructor
-//@Builder
+@Builder
 @Table(name = "transfers")
 @NoArgsConstructor
 public class Transfer {

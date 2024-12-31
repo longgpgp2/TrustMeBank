@@ -3,10 +3,7 @@ package com.trustme.model;
 import com.trustme.enums.TransferStatus;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -16,7 +13,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@Table(name="loans")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Loan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,11 +2,19 @@ package com.trustme.model;
 
 import com.trustme.enums.TransferStatus;
 import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Getter
+@Setter
+@Builder
+@Table(name="savings")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Saving {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

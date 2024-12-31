@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@Table(name="pending_transfers")
 @AllArgsConstructor
 @NoArgsConstructor
 public class PendingTransfer {
