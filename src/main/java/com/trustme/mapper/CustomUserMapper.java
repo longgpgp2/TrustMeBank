@@ -15,6 +15,8 @@ public class CustomUserMapper {
                 user.getAccountName(),
                 user.getBalance(),
                 user.getRole().getRoles(),
+                user.getEmail(),
+                user.getPhone(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.isDisabled()

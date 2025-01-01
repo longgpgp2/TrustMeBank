@@ -27,6 +27,13 @@ import com.trustme.service.CustomUserDetailsService;
 public class AuthController {
     private final CustomUserDetailsService userDetailsService;
     private final AuthService authService;
+
+    /**
+     * As of Spring Framework 4.3, an @Autowired annotation on such a constructor is no longer necessary if the target
+     * bean defines only one constructor to begin with. However, if several constructors are available and there is no
+     * primary/default constructor, at least one of the constructors must be annotated with @Autowired in order to
+     * instruct the container which one to use.
+     */
     public AuthController(CustomUserDetailsService userDetailsService, AuthService authService) {
         this.userDetailsService = userDetailsService;
         this.authService = authService;

@@ -1,6 +1,7 @@
 package com.trustme.service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import com.trustme.constant.ConstantResponses;
@@ -77,8 +78,11 @@ public class AuthService {
         User user = User.builder()
                 .username(registerRequest.getUsername())
                 .accountName(registerRequest.getAccountName())
+                .email(registerRequest.getEmail())
+                .phone(registerRequest.getPhone())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .balance(1000.0)
+                .createdAt(LocalDateTime.now())
                 .pinCode(registerRequest.getPinCode())
                 .role(role.get())
                 .build();
@@ -114,12 +118,20 @@ public class AuthService {
      * @return UserDto of the current user
      */
     public UserDto getCurrentUserDto(){
+        return CustomUserMapper.getUserDto(getCurrentUser());
+    }
+
+    /**
+     * Retrieve the current logged in user
+     *
+     * @return current User
+     */
+    public User getCurrentUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Jwt jwt = (Jwt) authentication.getPrincipal();
         Optional<User> user = userRepository.findByUsername(jwt.getSubject());
-        return CustomUserMapper.getUserDto(user.get());
+        return user.get();
     }
-
     /**
      * Extract authorities from user's role
      * @param user authenticated user

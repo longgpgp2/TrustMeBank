@@ -3,18 +3,10 @@ package com.trustme.model;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,13 +34,13 @@ public class User {
     @Column(nullable = false, unique = true)
     private String accountName;
 
-    @Column(nullable = false, length = 6, unique = true)
+    @Column(nullable = false, length = 6)
     private String pinCode;
 
-    @Column(nullable = false, columnDefinition = "DOUBLE DEFAULT 1000")
+    @Column(nullable = false, columnDefinition = "DOUBLE DEFAULT 1000.0")
     private Double balance = 1000.0;
 
-    @Column(nullable = false, length = 8)
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false, unique = true)

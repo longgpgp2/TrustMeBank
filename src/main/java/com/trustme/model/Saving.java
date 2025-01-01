@@ -1,5 +1,6 @@
 package com.trustme.model;
 
+import com.trustme.enums.SavingStatus;
 import com.trustme.enums.TransferStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,10 +25,10 @@ public class Saving {
     @JoinColumn(name = "saver_id", referencedColumnName = "id")
     private User saver;
 
-    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0")
+    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double amount = 0.0;
 
-    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0")
+    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double interestRate = 0.0;
 
     @Column(nullable = false)
@@ -49,8 +50,8 @@ public class Saving {
     /**
      * Common status for transferring, saving, loaning
      */
-    @Column(nullable = false, columnDefinition = "DEFAULT CHAR PENDING")
-    private TransferStatus status = TransferStatus.PENDING;
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'ACTIVE'")
+    private SavingStatus status = SavingStatus.ACTIVE;
 
     /**
      * Type of saving => should be enum

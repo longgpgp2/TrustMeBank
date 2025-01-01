@@ -19,6 +19,8 @@ public class UserDto {
     private String accountName;
     private double balance;
     private String[] role;
+    private String email;
+    private String phone;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean isDisabled;

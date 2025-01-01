@@ -31,7 +31,7 @@ public class Transfer {
     @JoinColumn(name = "receiver_id", referencedColumnName = "id")
     private User receiver;
     //need @GreaterThan annotation
-    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0")
+    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double amount = 0.0;
 
     @CreatedDate

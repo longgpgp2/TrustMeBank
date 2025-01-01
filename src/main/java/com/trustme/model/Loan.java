@@ -25,10 +25,10 @@ public class Loan {
     @JoinColumn(name = "borrower_id", referencedColumnName = "id")
     private User borrower;
 
-    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0")
+    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double amount = 0.0;
 
-    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0")
+    @Column(nullable = false,  columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double interestRate = 0.0;
 
     @Column(nullable = false)
