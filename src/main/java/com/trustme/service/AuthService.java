@@ -4,13 +4,14 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import com.trustme.constant.ConstantResponses;
 import com.trustme.dto.UserDto;
 import com.trustme.dto.request.UserLoginRequest;
 import com.trustme.dto.response.LoginResponse;
 import com.trustme.dto.response.UserResponse;
 import com.trustme.enums.Roles;
 import com.trustme.enums.StatusCode;
+import com.trustme.exception.exceptions.ResourceNotAvailableException;
+import com.trustme.exception.exceptions.ResourceNotFoundException;
 import com.trustme.mapper.CustomUserMapper;
 import com.trustme.model.CustomUserDetails;
 import io.jsonwebtoken.Jwts;
@@ -58,22 +59,11 @@ public class AuthService {
      * Registers a new user in the system.
      *
      * @param registerRequest the request object containing user registration details
-     * @throws UserAlreadyExistsException if the user already exists
-     */
-
-    /**
-     * @comment_by: toanlemanh
-     * this method should be provided by UserService
-     * does not make use of Mapper
-     * t nghi minh ko can tao repo cho role vi minh gan role vao user luon
-     * khong co user thi role cung ko ton tai duoc
-     *
-     *  cung cap gen token o auth service thi hop ly hon
-     *
      */
     public UserResponse registerUser(UserRegisterRequest registerRequest) {
-        // User user = UserMapper.INSTANCE.toUser (registerRequest);
-        Optional<Role> role = roleRepository.findById(1L);
+        Long roleId = 1L;
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(()-> new ResourceNotFoundException("Role not found" + roleId));
         System.out.println(registerRequest.toString());
         User user = User.builder()
                 .username(registerRequest.getUsername())
@@ -84,7 +74,7 @@ public class AuthService {
                 .balance(1000.0)
                 .createdAt(LocalDateTime.now())
                 .pinCode(registerRequest.getPinCode())
-                .role(role.get())
+                .role(role)
                 .build();
         userRepository.save(user);
         return new UserResponse(StatusCode.CREATED.getHttpStatus(),StatusCode.CREATED.getStatusMessage(), CustomUserMapper.getUserDto(user));
@@ -92,24 +82,15 @@ public class AuthService {
 
 
     public LoginResponse loginUser(UserLoginRequest loginRequest){
-        try {
-            CustomUserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
-                            loginRequest.getPassword()));
-            if (userDetails != null) {
-                List<String> authoritiesList = getJwtAuthoritiesFromRoles(userDetails);
-                User user = userDetails.getUser();
-                System.out.println(user.getUsername() + user.getPassword());
-                String token = generateJwt(user.getUsername(), authoritiesList, 3600L);
-                return new LoginResponse(200, "Login successful", token);
-            }
-        } catch (BadCredentialsException e) {
-            return ConstantResponses.INVALID_CREDENTIALS;
-        } catch (UsernameNotFoundException e) {
-            return ConstantResponses.USER_NOT_FOUND;
-        }
-        return ConstantResponses.INVALID_CREDENTIALS;
+        CustomUserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                        loginRequest.getPassword()));
+            List<String> authoritiesList = getJwtAuthoritiesFromRoles(userDetails);
+            User user = userDetails.getUser();
+            System.out.println(user.getUsername() + user.getPassword());
+            String token = generateJwt(user.getUsername(), authoritiesList, 3600L);
+        return new LoginResponse(200, "Login successful", token);
     }
 
     /**
@@ -129,8 +110,12 @@ public class AuthService {
     public User getCurrentUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Jwt jwt = (Jwt) authentication.getPrincipal();
-        Optional<User> user = userRepository.findByUsername(jwt.getSubject());
-        return user.get();
+        return userRepository.findByUsername(jwt.getSubject())
+                .orElseThrow(()-> new ResourceNotAvailableException("Login required!"));
+    }
+
+    public User saveUser(User user){
+        return userRepository.save(user);
     }
     /**
      * Extract authorities from user's role
@@ -180,4 +165,5 @@ public class AuthService {
                 .compact();
         return jwt;
     }
+
 }

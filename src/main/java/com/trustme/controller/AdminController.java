@@ -1,6 +1,5 @@
 package com.trustme.controller;
 
-import com.trustme.constant.ConstantResponses;
 import com.trustme.dto.TransferDto;
 import com.trustme.dto.response.Response;
 import com.trustme.dto.response.TransfersResponse;
@@ -32,14 +31,7 @@ public class AdminController {
     }
     @GetMapping("/transfers")
     public ResponseEntity<TransfersResponse> getTransfers(){
-        List<TransferDto> transfers = null;
-        try{
-             transfers = transferService.getAllTransfersHistory();
-        } catch (Exception e){
-            return ResponseEntity
-                    .status(ConstantResponses.GET_TRANSFERS_ERROR.getCode())
-                    .body(ConstantResponses.GET_TRANSFERS_ERROR);
-        }
+        List<TransferDto> transfers = transferService.getAllTransfersHistory();
         TransfersResponse transfersResponse = new TransfersResponse(200,
                 StatusCode.OK.getStatusMessage(),
                 transfers);

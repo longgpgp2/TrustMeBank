@@ -1,11 +1,10 @@
 package com.trustme.controller;
 
-import com.trustme.constant.ConstantResponses;
 import com.trustme.dto.UserDto;
 import com.trustme.dto.response.UserResponse;
 import com.trustme.enums.ErrorCode;
 import com.trustme.enums.StatusCode;
-import com.trustme.exception.exceptions.UsernameNotAvailableException;
+import com.trustme.exception.exceptions.ResourceNotAvailableException;
 import com.trustme.mapper.CustomUserMapper;
 import com.trustme.model.User;
 import com.trustme.service.UserService;
@@ -45,26 +44,13 @@ public class AuthController {
         return new ResponseEntity<String>("Hello, please enter your credentials", HttpStatus.OK);
     }
 
-    /**
-     *
-     * @comment_by: toanlemanh
-     *
-     *  minh co the tao enum cac loi thuong gap
-     *  ben trong controller dang xu ly nhieu logic qua, chu nen dispatch cho service roi
-     *  gui response tuong ung
-     */
     @PostMapping("/register")
     public ResponseEntity<UserResponse> postRegister(@RequestBody UserRegisterRequest registerRequest) {
-        System.out.println(registerRequest.getUsername() + ", " + registerRequest.getPassword() + ", " + registerRequest.getAccountName() + ", " +registerRequest.getPinCode());
-        try{
-            userDetailsService.loadUserByUsername(registerRequest.getUsername());
-        }
-        catch (UsernameNotFoundException e){
+            if (userDetailsService.loadUserByUsername(registerRequest.getUsername())!=null) {
+                throw new ResourceNotAvailableException("Username existed!");
+            }
             UserResponse userResponse = authService.registerUser(registerRequest);
             return ResponseEntity.status(userResponse.getCode()).body(userResponse);
-        }
-        return ResponseEntity.status(ConstantResponses.USER_EXISTED.getCode()).body(ConstantResponses.USER_EXISTED);
-
     }
 
     @GetMapping("/login")
@@ -91,19 +77,11 @@ public class AuthController {
 
     @GetMapping("/info")
     public ResponseEntity<UserResponse> getUserInfo(){
-        UserResponse userResponse = null;
-        try {
-            UserDto user = authService.getCurrentUserDto();
-            userResponse = new UserResponse(
+        UserDto user = authService.getCurrentUserDto();
+        UserResponse userResponse = new UserResponse(
                     StatusCode.OK.getHttpStatus(),
                     StatusCode.OK.getStatusMessage(),
                     user);
-        } catch (Exception e) {
-            userResponse = new UserResponse(
-                    ErrorCode.INVALID_USER.getHttpStatus(),
-                    ErrorCode.INVALID_USER.getErrorMessage(),
-                    null);
-        }
         return ResponseEntity.status(userResponse.getCode()).body(userResponse);
     }
 

@@ -45,19 +45,11 @@ public class UsersController {
 
     @GetMapping("/user")
     public ResponseEntity<UserResponse> getUser(@RequestParam String accountName) {
-        UserResponse userResponse = null;
-        try {
-            User user = userService.findUser(accountName);
-             userResponse = new UserResponse(
-                     StatusCode.OK.getHttpStatus(),
-                     StatusCode.OK.getStatusMessage(),
-                     CustomUserMapper.getUserDto(user));
-        } catch (Exception e) {
-            userResponse = new UserResponse(
-                    ErrorCode.INVALID_USER.getHttpStatus(),
-                    ErrorCode.INVALID_USER.getErrorMessage(),
-                    null);
-        }
+        User user = userService.findUser(accountName);
+        UserResponse userResponse = new UserResponse(
+                 StatusCode.OK.getHttpStatus(),
+                 StatusCode.OK.getStatusMessage(),
+                 CustomUserMapper.getUserDto(user));
         return ResponseEntity.status(userResponse.getCode()).body(userResponse);
 
     }

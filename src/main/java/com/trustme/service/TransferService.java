@@ -5,13 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.trustme.constant.ConstantResponses;
 import com.trustme.dto.request.TransferRequest;
 import com.trustme.dto.response.TransferResponse;
 import com.trustme.dto.response.TransfersResponse;
 import com.trustme.enums.ErrorCode;
 import com.trustme.enums.StatusCode;
-import com.trustme.exception.exceptions.AccountNotFoundException;
+import com.trustme.exception.exceptions.ResourceNotFoundException;
 import com.trustme.mapper.CustomTransferMapper;
 import com.trustme.model.PendingTransfer;
 import com.trustme.repository.PendingTransferRepository;
@@ -39,11 +38,12 @@ public class TransferService {
     private final TransferRepository transferRepository;
     private final UserRepository userRepository;
     private final PendingTransferRepository pendingTransferRepository;
-
-    public TransferService(TransferRepository transferRepository, UserRepository userRepository, PendingTransferRepository pendingTransferRepository) {
+    private final AuthService authService;
+    public TransferService(TransferRepository transferRepository, UserRepository userRepository, PendingTransferRepository pendingTransferRepository, AuthService authService) {
         this.transferRepository = transferRepository;
         this.userRepository = userRepository;
         this.pendingTransferRepository = pendingTransferRepository;
+        this.authService = authService;
     }
 
     /**
@@ -56,23 +56,14 @@ public class TransferService {
      */
     @Transactional
     public TransferResponse transferMoney(Double amount, String accountName, String description) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null && !authentication.isAuthenticated()) {
-            return new TransferResponse(ErrorCode.UNAUTHORIZED.getHttpStatus(), ErrorCode.UNAUTHORIZED.getErrorMessage(), null);
+        User sender = authService.getCurrentUser();
+        User receiver = userRepository.findByAccountName(accountName)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid receiver account name!"));
+        if (!sender.validateAccountBalance(amount) || amount<=0) {
+            throw new RuntimeException("Invalid amount!");
         }
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Optional<User> optionalUser = userRepository.findByUsername(jwt.getSubject());
-        Optional<User> optionalReceiver = userRepository.findByAccountName(accountName);
-        if (optionalUser.isEmpty() || optionalReceiver.isEmpty()) {
-            return ConstantResponses.INVALID_RECEIVER;
-        }
-        if (!optionalUser.get().validateAccountBalance(amount) || amount<=0) {
-            return ConstantResponses.INVALID_AMOUNT;
-        }
-        User sender = optionalUser.get();
-        User receiver = optionalReceiver.get();
         if (sender.getAccountName().equals(receiver.getAccountName())) {
-            return ConstantResponses.INVALID_RECEIVER;
+            throw new RuntimeException("Cannot transfer to the same account!");
         }
         Transfer transfer = saveTransfer(sender, receiver, amount, description);
         TransferDto transferDto = CustomTransferMapper.toTransferDto(transfer);
@@ -120,8 +111,11 @@ public class TransferService {
      * @param transferRequest representing user current working transfer request
      */
     public void startProcessingTransfer(TransferRequest transferRequest){
-        String senderName = getCurrentAccountName();
-        pendingTransferRepository.save(CustomTransferMapper.toPendingTransfer(transferRequest, senderName));
+        pendingTransferRepository.save(
+                CustomTransferMapper.toPendingTransfer(
+                    transferRequest,
+                    authService.getCurrentUser().getAccountName()
+                ));
     }
     /**
      * Retrieve the pending transfer
@@ -129,8 +123,7 @@ public class TransferService {
      * @return a pending transfer of the current user
      */
     public PendingTransfer getPendingTransfer(){
-        String senderName = pendingTransferRepository.findBySenderName(getCurrentAccountName()).getSenderName();
-        return pendingTransferRepository.findBySenderName(senderName);
+        return pendingTransferRepository.findBySenderName(authService.getCurrentUser().getAccountName());
     }
     /**
      * Delete the current user's pending transfer
@@ -138,15 +131,5 @@ public class TransferService {
     public void deletePendingTransfer(){
         pendingTransferRepository.delete(getPendingTransfer());
     }
-    /**
-     * Retrieve the current user's account name
-     *
-     * @return account name of the current user
-     */
-    public String getCurrentAccountName(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Optional<User> user = userRepository.findByUsername(jwt.getSubject());
-        return user.get().getAccountName();
-    }
+
 }
