@@ -5,7 +5,7 @@ import com.trustme.dto.response.SavingResponse;
 import com.trustme.dto.response.SavingsResponse;
 import com.trustme.enums.SavingStatus;
 import com.trustme.exception.exceptions.ResourceNotFoundException;
-import com.trustme.mapper.CustomSavingMapper;
+import com.trustme.dto.mapper.CustomSavingMapper;
 import com.trustme.model.Saving;
 import com.trustme.model.User;
 import com.trustme.repository.SavingRepository;

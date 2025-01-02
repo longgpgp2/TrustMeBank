@@ -12,19 +12,15 @@ import com.trustme.enums.Roles;
 import com.trustme.enums.StatusCode;
 import com.trustme.exception.exceptions.ResourceNotAvailableException;
 import com.trustme.exception.exceptions.ResourceNotFoundException;
-import com.trustme.mapper.CustomUserMapper;
+import com.trustme.dto.mapper.CustomUserMapper;
 import com.trustme.model.CustomUserDetails;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -61,6 +57,9 @@ public class AuthService {
      * @param registerRequest the request object containing user registration details
      */
     public UserResponse registerUser(UserRegisterRequest registerRequest) {
+        if (!userRepository.findByUsername(registerRequest.getUsername()).isEmpty()){
+            throw new ResourceNotAvailableException("User existed!");
+        }
         Long roleId = 1L;
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(()-> new ResourceNotFoundException("Role not found" + roleId));

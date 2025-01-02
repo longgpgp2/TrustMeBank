@@ -2,23 +2,18 @@ package com.trustme.service;
 
 import com.trustme.dto.UserDto;
 import com.trustme.dto.request.UserEditRequest;
-import com.trustme.dto.response.LoginResponse;
 import com.trustme.dto.response.UserEditResponse;
-import com.trustme.enums.ErrorCode;
 import com.trustme.enums.StatusCode;
 import com.trustme.exception.exceptions.ResourceNotFoundException;
-import com.trustme.mapper.CustomUserMapper;
+import com.trustme.dto.mapper.CustomUserMapper;
 import com.trustme.model.Role;
 import com.trustme.model.User;
-import com.trustme.mapper.UserMapper;
 import com.trustme.repository.RoleRepository;
 import com.trustme.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 /**
  * Service class for managing user-related operations.

@@ -3,7 +3,6 @@ package com.trustme.controller;
 import com.trustme.dto.TransferDto;
 import com.trustme.dto.response.Response;
 import com.trustme.dto.response.TransfersResponse;
-import com.trustme.enums.ErrorCode;
 import com.trustme.enums.StatusCode;
 import com.trustme.model.Transfer;
 import com.trustme.service.TransferService;

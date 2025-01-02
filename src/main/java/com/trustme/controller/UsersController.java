@@ -1,17 +1,13 @@
 package com.trustme.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.trustme.dto.UserDto;
 import com.trustme.dto.request.UserRegisterRequest;
-import com.trustme.enums.ErrorCode;
 import com.trustme.enums.StatusCode;
-import com.trustme.mapper.CustomUserMapper;
+import com.trustme.dto.mapper.CustomUserMapper;
 import com.trustme.service.AuthService;
 import com.trustme.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +16,6 @@ import com.trustme.dto.response.UserEditResponse;
 import com.trustme.dto.response.UserResponse;
 import com.trustme.dto.response.UsersResponse;
 import com.trustme.model.User;
-import com.trustme.repository.UserRepository;
 
 @RestController
 @RequestMapping("/admin")

@@ -2,17 +2,9 @@ package com.trustme.controller;
 
 import com.trustme.dto.UserDto;
 import com.trustme.dto.response.UserResponse;
-import com.trustme.enums.ErrorCode;
 import com.trustme.enums.StatusCode;
-import com.trustme.exception.exceptions.ResourceNotAvailableException;
-import com.trustme.mapper.CustomUserMapper;
-import com.trustme.model.User;
-import com.trustme.service.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import com.trustme.dto.request.UserLoginRequest;
@@ -46,9 +38,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> postRegister(@RequestBody UserRegisterRequest registerRequest) {
-            if (userDetailsService.loadUserByUsername(registerRequest.getUsername())!=null) {
-                throw new ResourceNotAvailableException("Username existed!");
-            }
             UserResponse userResponse = authService.registerUser(registerRequest);
             return ResponseEntity.status(userResponse.getCode()).body(userResponse);
     }

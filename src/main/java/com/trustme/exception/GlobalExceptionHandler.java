@@ -3,6 +3,7 @@ package com.trustme.exception;
 import com.trustme.dto.response.Response;
 import com.trustme.exception.exceptions.ResourceNotAvailableException;
 import com.trustme.exception.exceptions.ResourceNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -32,6 +33,23 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(errorBody);
     }
+
+    /**
+     * Handles DataIntegrityViolationException, typically thrown when there is a violation in database integrity.
+     *
+     * @param exception the DataIntegrityViolationException to handle
+     * @return a ResponseEntity containing an error response with a message and a 400 status code
+     */
+    @ExceptionHandler(value = DataIntegrityViolationException.class)
+    public ResponseEntity<Response> handlingDataIntegrityViolationException(DataIntegrityViolationException exception) {
+        Response errorBody = Response.builder()
+                .code(400)
+                .message("Data integrity violation!")
+                .build();
+
+        return ResponseEntity.badRequest().body(errorBody);
+    }
+
 
     /**
      * Handles UsernameNotFoundException, typically thrown by Spring Security when a user is not found.

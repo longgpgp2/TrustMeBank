@@ -19,6 +19,14 @@ spring:
 jwt:
   encodedSigningKey: H8aUSA5regz2w2sniXu8Io8cdzYsorque/XlnaLvTYvYKcKEClFTqBRc84an5bQxLWMc5TyMkqfuS9AZxcF+hw== #base64
 
+google:
+  client:
+    id: ...
+    secret: ...
+    base-url: ...
+    registration-id: ...
+
+
 logging:
   level:
     org.springframework.security: INFO

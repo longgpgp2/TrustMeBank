@@ -1,4 +1,4 @@
-package com.trustme.mapper;
+package com.trustme.dto.mapper;
 
 import org.mapstruct.Mapper;
 

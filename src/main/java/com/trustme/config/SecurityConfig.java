@@ -4,6 +4,9 @@ import java.util.Base64;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import com.trustme.config.oauth2.CustomAuthenticationEntryPoint;
+import com.trustme.config.oauth2.CustomOAuth2AuthenticationSuccessHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,7 +16,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 /**
  * String Configuration Component for configuring Spring Security & Oauth2, jwt functionalities
@@ -22,7 +24,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 public class SecurityConfig {
     // @Value("${jwt.signerKey}")
     static String SIGNING_KEY_BASE64 = "BynaRVN1R8shGkku6SmSnQJzGc8ZSs7aTQzDRlnD2ckNfZ+EDEInq0ap6Ktqcm6meg3sNQaLyDGOCRw6eMC1Vg==";
-
+    @Autowired
+    private CustomOAuth2AuthenticationSuccessHandler successHandler;
     /**
      * 1. The authentication Filter from Reading the Bearer Token passes a
      * BearerTokenAuthenticationToken to the AuthenticationManager which is
@@ -49,19 +52,21 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/admin/admins").hasAuthority("admin:manage")
                         .requestMatchers("/admin/users").hasAuthority("user:manage")
                         .requestMatchers("/admin/transactions").hasAuthority("transaction:manage")
                         .requestMatchers("/admin/**").hasAuthority("admin:read")
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/auth/info").authenticated()
-                        .requestMatchers("/auth/**").permitAll()
                         .anyRequest().permitAll())
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                         .jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
-
-                );
+                )
+                .oauth2Login(oauth2-> oauth2
+                        .successHandler(successHandler));
 
         // disable this to enable h2 functionalities within a frame
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));

@@ -1,4 +1,4 @@
-package com.trustme.mapper;
+package com.trustme.dto.mapper;
 
 import com.trustme.dto.SavingDto;
 import com.trustme.model.Saving;

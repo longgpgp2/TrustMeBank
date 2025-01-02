@@ -2,24 +2,14 @@ package com.trustme.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.trustme.dto.request.TransferRequest;
 import com.trustme.dto.response.TransferResponse;
-import com.trustme.dto.response.TransfersResponse;
-import com.trustme.enums.ErrorCode;
 import com.trustme.enums.StatusCode;
 import com.trustme.exception.exceptions.ResourceNotFoundException;
-import com.trustme.mapper.CustomTransferMapper;
+import com.trustme.dto.mapper.CustomTransferMapper;
 import com.trustme.model.PendingTransfer;
 import com.trustme.repository.PendingTransferRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.trustme.dto.TransferDto;
