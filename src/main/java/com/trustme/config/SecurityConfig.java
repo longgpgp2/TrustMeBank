@@ -1,21 +1,16 @@
 package com.trustme.config;
 
-import java.util.Base64;
-
-import javax.crypto.spec.SecretKeySpec;
-
+import com.trustme.config.filter.CookieToHeaderFilter;
 import com.trustme.config.oauth2.CustomAuthenticationEntryPoint;
 import com.trustme.config.oauth2.CustomOAuth2AuthenticationSuccessHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.trustme.config.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * String Configuration Component for configuring Spring Security & Oauth2, jwt functionalities
@@ -23,9 +18,51 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
     // @Value("${jwt.signerKey}")
-    static String SIGNING_KEY_BASE64 = "BynaRVN1R8shGkku6SmSnQJzGc8ZSs7aTQzDRlnD2ckNfZ+EDEInq0ap6Ktqcm6meg3sNQaLyDGOCRw6eMC1Vg==";
-    @Autowired
-    private CustomOAuth2AuthenticationSuccessHandler successHandler;
+
+    private final CustomOAuth2AuthenticationSuccessHandler successHandler;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CookieToHeaderFilter cookieToHeaderFilter;
+    private final JwtDecoder jwtDecoder;
+
+    public SecurityConfig(CustomOAuth2AuthenticationSuccessHandler successHandler, JwtAuthenticationFilter jwtAuthenticationFilter, CookieToHeaderFilter cookieToHeaderFilter, JwtDecoder jwtDecoder) {
+        this.successHandler = successHandler;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.cookieToHeaderFilter = cookieToHeaderFilter;
+        this.jwtDecoder = jwtDecoder;
+    }
+
+
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/admin/admins").hasAuthority("admin:manage")
+                        .requestMatchers("/admin/users").hasAuthority("user:manage")
+                        .requestMatchers("/admin/transactions").hasAuthority("transaction:manage")
+                        .requestMatchers("/admin/**").hasAuthority("admin:read")
+                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/auth/info").authenticated()
+                        .anyRequest().permitAll())
+                .addFilterBefore(cookieToHeaderFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2ResourceServer((oauth2) -> oauth2
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                        .jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder))
+                )
+                .oauth2Login(oauth2-> oauth2
+                        .successHandler(successHandler));
+
+        // disable this to enable h2 functionalities within a frame
+        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
+        return http.build();
+    }
+
+
     /**
      * 1. The authentication Filter from Reading the Bearer Token passes a
      * BearerTokenAuthenticationToken to the AuthenticationManager which is
@@ -46,53 +83,4 @@ public class SecurityConfig {
      * returned JwtAuthenticationToken will be set on the SecurityContextHolder
      * by the authentication Filter.
      */
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/admin/admins").hasAuthority("admin:manage")
-                        .requestMatchers("/admin/users").hasAuthority("user:manage")
-                        .requestMatchers("/admin/transactions").hasAuthority("transaction:manage")
-                        .requestMatchers("/admin/**").hasAuthority("admin:read")
-                        .requestMatchers("/api/**").authenticated()
-                        .requestMatchers("/auth/info").authenticated()
-                        .anyRequest().permitAll())
-                .oauth2ResourceServer((oauth2) -> oauth2
-                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-                        .jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
-                )
-                .oauth2Login(oauth2-> oauth2
-                        .successHandler(successHandler));
-
-        // disable this to enable h2 functionalities within a frame
-        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
-        return http.build();
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        byte[] decodedKey = Base64.getDecoder().decode(SIGNING_KEY_BASE64);
-        SecretKeySpec secretKeySpec = new SecretKeySpec(decodedKey, "HS512");
-
-        return NimbusJwtDecoder.withSecretKey(secretKeySpec).macAlgorithm(MacAlgorithm.HS512).build();
-    }
-
-    /**
-     * Bean for configuring jwt claims' prefixes.
-     */
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
-
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-
-        return jwtAuthenticationConverter;
-    }
-
 }

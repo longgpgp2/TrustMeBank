@@ -1,6 +1,7 @@
 package com.trustme.config.oauth2;
 
 import com.trustme.service.AuthService;
+import com.trustme.util.JwtUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,15 +17,16 @@ import java.io.IOException;
 @Configuration
 public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     private final AuthService authService;
-
-    public CustomOAuth2AuthenticationSuccessHandler(AuthService authService) {
+    private final JwtUtil jwtUtil;
+    public CustomOAuth2AuthenticationSuccessHandler(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("Authentication successful, start sending cookies!");
-        String token = authService.generateJwt(authentication.getName(), null, 3600L);
+        String token = jwtUtil.generateJwt(authentication.getName(), null, 3600L);
 
         Cookie jwtCookie = new Cookie("jwt-token", token);
         jwtCookie.setHttpOnly(true);

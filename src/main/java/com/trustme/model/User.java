@@ -52,7 +52,7 @@ public class User {
     @Column(nullable = true)
     private LocalDateTime dob;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
 

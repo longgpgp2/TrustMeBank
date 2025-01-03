@@ -3,7 +3,10 @@ package com.trustme.controller;
 import com.trustme.dto.UserDto;
 import com.trustme.dto.response.UserResponse;
 import com.trustme.enums.StatusCode;
+import jakarta.servlet.http.Cookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +15,9 @@ import com.trustme.dto.request.UserRegisterRequest;
 import com.trustme.dto.response.LoginResponse;
 import com.trustme.service.AuthService;
 import com.trustme.service.CustomUserDetailsService;
+
+import java.net.URI;
+import java.net.URL;
 
 @RestController()
 @RequestMapping("/auth")
@@ -54,8 +60,20 @@ public class AuthController {
     public ResponseEntity<LoginResponse> postLogin(@RequestBody UserLoginRequest loginRequest) {
         LoginResponse loginResponse = authService.loginUser(loginRequest);
 
+        ResponseCookie jwtCookie = ResponseCookie.from("jwt-token", loginResponse.getResult())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Strict")
+                .build();
+
+        URI nextStep = URI.create("/api/home");
+
         return ResponseEntity.status(
                 loginResponse.getCode())
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .location(nextStep)
                 .body(loginResponse);
     }
 
