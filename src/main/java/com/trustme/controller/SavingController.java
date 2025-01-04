@@ -4,17 +4,15 @@ import com.trustme.dto.request.SavingRequest;
 import com.trustme.dto.response.SavingResponse;
 import com.trustme.dto.response.SavingsResponse;
 import com.trustme.service.SavingService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api")
 public class SavingController {
     private final SavingService savingService;
-
-    public SavingController(SavingService savingService) {
-        this.savingService = savingService;
-    }
 
     @PostMapping("/savings")
     public ResponseEntity<SavingResponse> postSaving(@RequestBody SavingRequest savingRequest){

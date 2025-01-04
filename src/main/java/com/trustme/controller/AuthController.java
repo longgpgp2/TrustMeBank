@@ -4,6 +4,7 @@ import com.trustme.dto.UserDto;
 import com.trustme.dto.response.UserResponse;
 import com.trustme.enums.StatusCode;
 import jakarta.servlet.http.Cookie;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -18,23 +19,20 @@ import com.trustme.service.CustomUserDetailsService;
 
 import java.net.URI;
 import java.net.URL;
-
-@RestController()
+/**
+ * As of Spring Framework 4.3, an @Autowired annotation on such a constructor is no longer necessary if the target
+ * bean defines only one constructor to begin with. However, if several constructors are available and there is no
+ * primary/default constructor, at least one of the constructors must be annotated with @Autowired in order to
+ * instruct the container which one to use.
+ */
+@AllArgsConstructor
+@RestController
 @RequestMapping("/auth")
 public class AuthController {
     private final CustomUserDetailsService userDetailsService;
     private final AuthService authService;
 
-    /**
-     * As of Spring Framework 4.3, an @Autowired annotation on such a constructor is no longer necessary if the target
-     * bean defines only one constructor to begin with. However, if several constructors are available and there is no
-     * primary/default constructor, at least one of the constructors must be annotated with @Autowired in order to
-     * instruct the container which one to use.
-     */
-    public AuthController(CustomUserDetailsService userDetailsService, AuthService authService) {
-        this.userDetailsService = userDetailsService;
-        this.authService = authService;
-    }
+
 
 
     @GetMapping("/register")
@@ -64,7 +62,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .maxAge(7 * 24 * 60 * 60)
+                .maxAge( 3600)
                 .sameSite("Strict")
                 .build();
 

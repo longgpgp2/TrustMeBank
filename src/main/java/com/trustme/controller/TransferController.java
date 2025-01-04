@@ -14,6 +14,7 @@ import com.trustme.service.AuthService;
 import com.trustme.service.QRCodeService;
 import com.trustme.service.TransferService;
 import com.trustme.service.UserService;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api")
 public class TransferController {
@@ -39,11 +41,6 @@ public class TransferController {
 
     private final QRCodeService qrCodeService;
     private final TransferService transferService;
-
-    public TransferController(QRCodeService qrCodeService, TransferService transferService) {
-        this.qrCodeService = qrCodeService;
-        this.transferService = transferService;
-    }
 
     @GetMapping("/transfer")
     public ResponseEntity<String> getTransfer(){

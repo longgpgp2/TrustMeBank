@@ -1,5 +1,6 @@
 package com.trustme.model;
 
+import com.trustme.enums.LoanStatus;
 import com.trustme.enums.TransferStatus;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -49,5 +50,5 @@ public class Loan {
     /**
      * Transfer status is enum: Pending (default), Completed and Failed
      */
-    private TransferStatus status = TransferStatus.PENDING;
+    private LoanStatus status = LoanStatus.PENDING;
 }

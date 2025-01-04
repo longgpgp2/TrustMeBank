@@ -59,7 +59,6 @@ public class AuthService {
         Long roleId = 1L;
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(()-> new ResourceNotFoundException("Role not found" + roleId));
-        System.out.println(registerRequest.toString());
         User user = User.builder()
                 .username(registerRequest.getUsername())
                 .accountName(registerRequest.getAccountName())
@@ -83,7 +82,6 @@ public class AuthService {
                         loginRequest.getPassword()));
             List<String> authoritiesList = jwtUtil.getJwtAuthoritiesFromRoles(userDetails);
             User user = userDetails.getUser();
-            System.out.println(user.getUsername() + user.getPassword());
             String token = jwtUtil.generateJwt(user.getUsername(), authoritiesList, 3600L);
         return new LoginResponse(200, "Login successful", token);
     }
