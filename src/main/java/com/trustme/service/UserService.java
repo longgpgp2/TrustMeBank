@@ -68,6 +68,7 @@ public class UserService {
         user.setDisabled(userEditRequest.isDisabled());
         Role role = roleRepository.findById(userEditRequest.getRole())
                 .orElse(user.getRole());
+        user.setFullName(userEditRequest.getFullName()==null?user.getFullName(): userEditRequest.getFullName());
         user.setRole(role);
     }
 

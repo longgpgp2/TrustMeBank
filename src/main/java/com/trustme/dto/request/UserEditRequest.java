@@ -10,6 +10,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 public class UserEditRequest {
     private String targetAccount;
+    private String fullName;
     private String accountName;
     private Long role;
     private boolean isDisabled;

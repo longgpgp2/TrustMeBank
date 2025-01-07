@@ -17,6 +17,7 @@ public class CustomTransferMapper {
                         t.getReceiver().getAccountName(),
                         t.getAmount(),
                         t.getTimestamp(),
+                        t.getStatus(),
                         t.getDescription()))
                 .collect(Collectors.toList());
     }
@@ -28,6 +29,7 @@ public class CustomTransferMapper {
                 transfer.getReceiver().getAccountName(),
                 transfer.getAmount(),
                 transfer.getTimestamp(),
+                transfer.getStatus(),
                 transfer.getDescription());
     }
 

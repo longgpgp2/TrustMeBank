@@ -12,6 +12,7 @@ public class CustomUserMapper {
         return new UserDto(
                 user.getId(),
                 user.getUsername(),
+                user.getFullName(),
                 user.getAccountName(),
                 user.getBalance(),
                 user.getRole().getRoles(),

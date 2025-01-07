@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class SavingDto {
+    private Long id;
+
     private String saverAccountName;
 
     private Double amount;

@@ -13,6 +13,7 @@ import com.trustme.exception.exceptions.ResourceNotFoundException;
 import com.trustme.dto.mapper.CustomUserMapper;
 import com.trustme.model.CustomUserDetails;
 import com.trustme.util.JwtUtil;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -53,14 +54,13 @@ public class AuthService {
      * @param registerRequest the request object containing user registration details
      */
     public UserResponse registerUser(UserRegisterRequest registerRequest) {
-        if (!userRepository.findByUsername(registerRequest.getUsername()).isEmpty()){
-            throw new ResourceNotAvailableException("User existed!");
-        }
+        validateRegisterRequest(registerRequest);
         Long roleId = 1L;
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(()-> new ResourceNotFoundException("Role not found" + roleId));
         User user = User.builder()
                 .username(registerRequest.getUsername())
+                .fullName(registerRequest.getFullName())
                 .accountName(registerRequest.getAccountName())
                 .email(registerRequest.getEmail())
                 .phone(registerRequest.getPhone())
@@ -70,6 +70,7 @@ public class AuthService {
                 .pinCode(registerRequest.getPinCode())
                 .role(role)
                 .build();
+
         userRepository.save(user);
         return new UserResponse(StatusCode.CREATED.getHttpStatus(),StatusCode.CREATED.getStatusMessage(), CustomUserMapper.getUserDto(user));
     }
@@ -111,4 +112,25 @@ public class AuthService {
         return userRepository.save(user);
     }
 
+    public void validateRegisterRequest(UserRegisterRequest userRegisterRequest){
+        if (userRepository.existsByUsername(userRegisterRequest.getUsername())) {
+            throw new ResourceNotAvailableException("Username already exists");
+        }
+
+        if (userRepository.existsByAccountName(userRegisterRequest.getUsername())) {
+            throw new ResourceNotAvailableException("Account Name already exists");
+        }
+
+        if (userRepository.existsByEmail(userRegisterRequest.getEmail())) {
+            throw new ResourceNotAvailableException("Email already exists");
+        }
+
+        if (userRepository.existsByPhone(userRegisterRequest.getPhone())) {
+            throw new ResourceNotAvailableException("Phone number already exists");
+        }
+    }
+
+    public void validateUser(){
+
+    }
 }

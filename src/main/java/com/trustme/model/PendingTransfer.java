@@ -23,5 +23,6 @@ public class PendingTransfer {
     private String description;
     private String senderName;
     private String receiverName;
+    private TransferStatus transferStatus = TransferStatus.PENDING;
 
 }

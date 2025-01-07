@@ -6,6 +6,7 @@ import java.util.List;
 import com.trustme.dto.request.TransferRequest;
 import com.trustme.dto.response.TransferResponse;
 import com.trustme.enums.StatusCode;
+import com.trustme.enums.TransferStatus;
 import com.trustme.exception.exceptions.ResourceNotFoundException;
 import com.trustme.dto.mapper.CustomTransferMapper;
 import com.trustme.model.PendingTransfer;
@@ -79,6 +80,7 @@ public class TransferService {
                 .amount(amount)
                 .timestamp(LocalDateTime.now())
                 .description(description)
+                .status(TransferStatus.COMPLETED)
                 .build();
         transferRepository.save(transfer);
         userRepository.save(sender);

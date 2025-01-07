@@ -8,6 +8,7 @@ import com.trustme.model.Saving;
 public class CustomLoanMapper {
     public static LoanDto getLoanDto(Loan loan){
         return LoanDto.builder()
+                .id(loan.getId())
                 .borrowerAccountName(loan.getBorrower().getAccountName())
                 .status(loan.getStatus())
                 .startDate(loan.getStartDate())

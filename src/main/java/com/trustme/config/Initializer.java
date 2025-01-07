@@ -42,8 +42,8 @@ public class Initializer implements CommandLineRunner {
             userRole.setId(Long.parseLong("3"));
 
             roleRepository.saveAll(Arrays.asList(superAdminRole, adminRole, userRole));
-            UserRegisterRequest user1 = new UserRegisterRequest("user1", "user1", "a@a", "0123456789", "123456", "123456");
-            UserRegisterRequest user2 = new UserRegisterRequest("user2", "user2", "b@b", "0987654321", "123456", "123456");
+            UserRegisterRequest user1 = new UserRegisterRequest("user1", "user1 fullname", "user1", "a@a", "0123456789", "123456", "123456");
+            UserRegisterRequest user2 = new UserRegisterRequest("user2", "user2 fullname", "user2", "b@b", "0987654321", "123456", "123456");
             authService.registerUser(user1);
             authService.registerUser(user2);
 

@@ -1,5 +1,6 @@
 package com.trustme.dto;
 
+import com.trustme.enums.TransferStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,5 +18,6 @@ public class TransferDto {
     private String receiverName;
     private double amount;
     private LocalDateTime timeStamp;
+    private TransferStatus transferStatus;
     private String description;
 }

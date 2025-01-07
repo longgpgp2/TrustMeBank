@@ -3,12 +3,16 @@ package com.trustme.controller;
 import com.trustme.dto.UserDto;
 import com.trustme.dto.response.UserResponse;
 import com.trustme.enums.StatusCode;
+import com.trustme.exception.exceptions.ResourceNotAvailableException;
 import jakarta.servlet.http.Cookie;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import com.trustme.dto.request.UserLoginRequest;
@@ -19,6 +23,9 @@ import com.trustme.service.CustomUserDetailsService;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * As of Spring Framework 4.3, an @Autowired annotation on such a constructor is no longer necessary if the target
  * bean defines only one constructor to begin with. However, if several constructors are available and there is no
@@ -41,8 +48,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> postRegister(@RequestBody UserRegisterRequest registerRequest) {
+    public ResponseEntity<UserResponse> postRegister(@Valid @RequestBody UserRegisterRequest registerRequest, BindingResult bindingResult) {
             UserResponse userResponse = authService.registerUser(registerRequest);
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new ResourceNotAvailableException(errorMessages.toString());
+        }
             return ResponseEntity.status(userResponse.getCode()).body(userResponse);
     }
 
